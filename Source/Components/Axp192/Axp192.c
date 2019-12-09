@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * 
  *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,63 +20,37 @@
 /***************************************************************************************************
  * INCLUDES
  **************************************************************************************************/
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_spi_flash.h"
-
 #include "Axp192.h"
+#include "Axp192_Cfg.h"
+#include "driver/i2c.h"
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
-static void InitializeMemory();
-static void InitializeComponents();
+
+/***************************************************************************************************
+ * CONSTANTS
+ **************************************************************************************************/
+const i2c_config_t Axp192_Configuration =
+{
+  I2C_MODE_MASTER,
+  GPIO_NUM_21,
+  GPIO_PULLUP_DISABLE,
+  GPIO_NUM_22,
+  GPIO_PULLUP_DISABLE,
+  {
+   {
+    400000
+   }
+  }
+};
 /***************************************************************************************************
  * IMPLEMENTATION
  **************************************************************************************************/
-void app_main()
+void Axp192_InitMemory()
 {
-    /* Print chip information */
-    esp_chip_info_t chip_info;
-    esp_chip_info(&chip_info);
-    printf("This is ESP32 chip with %d CPU cores, WiFi%s%s, ",
-            chip_info.cores,
-            (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
-            (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
-
-    printf("silicon revision %d, ", chip_info.revision);
-
-    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
-            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-
-    fflush(stdout);
-
-    InitializeMemory();
-
-    InitializeComponents();
-
-    while (1)
-    {
-      /* Intended endless loop */
-      vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-
-    for (int i = 10; i >= 0; i--) {
-        printf("Restarting in %d seconds...\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-    printf("Restarting now.\n");
-    fflush(stdout);
-    esp_restart();
 }
 
-static void InitializeMemory()
+void Axp192_Init()
 {
-  Axp192_InitMemory();
-}
-
-static void InitializeComponents()
-{
-  Axp192_Init();
+  i2c_param_config(I2C_NUM_0, &Axp192_Configuration);
 }
