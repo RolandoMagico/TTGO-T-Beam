@@ -1,0 +1,17 @@
+/.bin_timestamp
+/.ninja_deps
+/.ninja_log
+/build.ninja
+/cmake_install.cmake
+/compile_commands.json
+/config.env
+/CMakeCache.txt
+/bootloader/*
+/bootloader-prefix/*
+/CMakeFiles/*
+/config/*
+/esp-idf/*
+/rules.ninja
+/ldgen_libraries
+/ldgen_libraries.in
+/project_description.json
