@@ -2,5 +2,5 @@
 	path = esp-idf
 	url = https://github.com/espressif/esp-idf.git
 	branch = release/v4.0
-  fetchRecurseSubmodules = true
-  update = checkout
+	fetchRecurseSubmodules = true
+	update = checkout
