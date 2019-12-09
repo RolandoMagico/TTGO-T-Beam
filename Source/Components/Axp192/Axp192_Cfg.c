@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * 
  *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -17,38 +17,37 @@
  * under the License.
  */
 
-#ifndef AXP192_AXP192_H_
-#define AXP192_AXP192_H_
-
 /***************************************************************************************************
  * INCLUDES
  **************************************************************************************************/
-
-/***************************************************************************************************
- * DEFINES
- **************************************************************************************************/
-
-/***************************************************************************************************
- * TYPES
- **************************************************************************************************/
-typedef enum
-{
-  PowerStatusRegister,
-  PowerMode_ChargeStatusRegiser,
-  OtgVbusStatusRegister = 0x04,
-  DataBufferRegister0 = 0x06,
-  DataBufferRegister1,
-  DataBufferRegister2,
-  DataBufferRegister3,
-  DataBufferRegister4,
-  DataBufferRegister5
-} Axp192_RegisterType;
+#include "Axp192.h"
+#include "Axp192_Cfg.h"
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
-extern void Axp192_InitMemory();
-extern void Axp192_Init();
+
+/***************************************************************************************************
+ * CONSTANTS
+ **************************************************************************************************/
+const i2c_config_t Axp192_Configuration =
+{
+  I2C_MODE_MASTER,
+  /* SDA pin */
+  GPIO_NUM_21,
+  GPIO_PULLUP_ENABLE,
+
+  /* SCL pin */
+  GPIO_NUM_22,
+  GPIO_PULLUP_ENABLE,
+  {
+   {
+    /* 400kHz baud rate */
+    400000
+   }
+  }
+};
+/***************************************************************************************************
+ * IMPLEMENTATION
+ **************************************************************************************************/
 
 
-
-#endif /* AXP192_AXP192_H_ */

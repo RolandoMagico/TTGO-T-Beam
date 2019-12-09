@@ -23,26 +23,27 @@
 #include "Axp192.h"
 #include "Axp192_Cfg.h"
 #include "driver/i2c.h"
+
+/***************************************************************************************************
+ * DEFINES
+ **************************************************************************************************/
+#ifdef AXP_192_DEBUG_OUTPUT_ENABLED
+#define AXP_192_PRINTF(format, ...) \
+  printf("File %s, function %s, line %d: " format "\n", __FILE__, __FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
+#else
+#define AXP_192_PRINTF(format, ...)
+#endif
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
-
+static void Axp192_ReadI2cData();
+static void Axp192_WriteI2cData(uint8_t);
+static void Axp192_ReadRegister(Axp192_RegisterType, uint8_t*);
+static void Axp192_WriteRegister(Axp192_RegisterType, uint8_t);
 /***************************************************************************************************
  * CONSTANTS
  **************************************************************************************************/
-const i2c_config_t Axp192_Configuration =
-{
-  I2C_MODE_MASTER,
-  GPIO_NUM_21,
-  GPIO_PULLUP_DISABLE,
-  GPIO_NUM_22,
-  GPIO_PULLUP_DISABLE,
-  {
-   {
-    400000
-   }
-  }
-};
+
 /***************************************************************************************************
  * IMPLEMENTATION
  **************************************************************************************************/
@@ -52,5 +53,88 @@ void Axp192_InitMemory()
 
 void Axp192_Init()
 {
-  i2c_param_config(I2C_NUM_0, &Axp192_Configuration);
+  uint8_t rxBuffer = 0x00u;
+  i2c_param_config(AXP_192_I2C_PORT, &Axp192_Configuration);
+  i2c_driver_install(AXP_192_I2C_PORT, Axp192_Configuration.mode, 0, 0, ESP_INTR_FLAG_IRAM);
+  for (int i = DataBufferRegister0; i <= DataBufferRegister5; i++)
+  {
+    Axp192_WriteRegister(i, i);
+  }
+  Axp192_ReadRegister(DataBufferRegister0, &rxBuffer);
+  Axp192_ReadRegister(DataBufferRegister1, &rxBuffer);
+  Axp192_ReadRegister(DataBufferRegister2, &rxBuffer);
+  Axp192_ReadRegister(DataBufferRegister3, &rxBuffer);
+  Axp192_ReadRegister(DataBufferRegister4, &rxBuffer);
+  Axp192_ReadRegister(DataBufferRegister5, &rxBuffer);
+}
+
+static void Axp192_ReadRegister(Axp192_RegisterType registerAddress, uint8_t* buffer)
+{
+  Axp192_WriteI2cData(registerAddress);
+  Axp192_ReadI2cData(buffer, 1);
+  AXP_192_PRINTF("Reading register 0x%02X done. Read value: 0x%02X\n", (int)registerAddress, (int)(*buffer));
+}
+
+static void Axp192_WriteRegister(Axp192_RegisterType registerAddress, uint8_t data)
+{
+  Axp192_WriteI2cData(registerAddress);
+  Axp192_WriteI2cData(data);
+}
+
+static void Axp192_ReadI2cData(uint8_t* buffer, size_t bufferLength)
+{
+  i2c_cmd_handle_t i2c_cmd_handle = i2c_cmd_link_create();
+  if (i2c_master_start(i2c_cmd_handle) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_start");
+  }
+  else if (i2c_master_write_byte(i2c_cmd_handle, (AXP_192_SLAVE_ADDRESS << 1) | I2C_MASTER_READ, true) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_write_byte");
+  }
+  else if (i2c_master_read_byte(i2c_cmd_handle, buffer, I2C_MASTER_ACK) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_read");
+  }
+  else if (i2c_master_stop(i2c_cmd_handle) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_stop");
+  }
+  else if (i2c_master_cmd_begin(AXP_192_I2C_PORT, i2c_cmd_handle, 1000 / portTICK_RATE_MS) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_cmd_begin");
+  }
+  else
+  {
+    i2c_cmd_link_delete(i2c_cmd_handle);
+  }
+}
+
+static void Axp192_WriteI2cData(uint8_t data)
+{
+  i2c_cmd_handle_t i2c_cmd_handle = i2c_cmd_link_create();
+  if (i2c_master_start(i2c_cmd_handle) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_start\n");
+  }
+  else if (i2c_master_write_byte(i2c_cmd_handle, (AXP_192_SLAVE_ADDRESS << 1) | I2C_MASTER_WRITE, true) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_write_byte\n");
+  }
+  else if (i2c_master_write_byte(i2c_cmd_handle, data, true) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_write_byte\n");
+  }
+  else if (i2c_master_stop(i2c_cmd_handle) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_stop\n");
+  }
+  else if (i2c_master_cmd_begin(AXP_192_I2C_PORT, i2c_cmd_handle, 5000 / portTICK_RATE_MS) != ESP_OK)
+  {
+    AXP_192_PRINTF("Axp192: Error during i2c_master_cmd_begin\n");
+  }
+  else
+  {
+    i2c_cmd_link_delete(i2c_cmd_handle);
+  }
 }
