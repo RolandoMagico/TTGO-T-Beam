@@ -92,7 +92,7 @@ static void Axp192_ReadI2cData(uint8_t* buffer, size_t bufferLength)
   {
     AXP_192_PRINTF("Axp192: Error during i2c_master_write_byte");
   }
-  else if (i2c_master_read_byte(i2c_cmd_handle, buffer, I2C_MASTER_ACK) != ESP_OK)
+  else if (i2c_master_read_byte(i2c_cmd_handle, buffer, I2C_MASTER_NACK) != ESP_OK)
   {
     AXP_192_PRINTF("Axp192: Error during i2c_master_read");
   }
