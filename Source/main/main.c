@@ -56,6 +56,13 @@ void app_main()
 
     InitializeComponents();
 
+    /* TODO: Just for testing */
+    /* Axp192_SetDcDc1Voltage(3300); */
+    /* Axp192_SetDcDc1State(Axp192_On); */
+
+    /* TODO: Enable voltage on LDO2 for SX1276 LORA module */
+    /* TODO: Enable voltage on LDO3 for NEO6 GPS module */
+
     while (1)
     {
       /* Intended endless loop */
