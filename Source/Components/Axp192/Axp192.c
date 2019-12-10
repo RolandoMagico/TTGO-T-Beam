@@ -40,7 +40,21 @@
 #define AXP_192_DCDC1_MIN_VOLTAGE             (700u)
 #define AXP_192_DCDC1_MAX_VOLTAGE             (3500u)
 
+/**
+ * Minimum and maximum voltages for LD02
+ */
+#define AXP_192_LDO2_MIN_VOLTAGE             (1800u)
+#define AXP_192_LDO2_MAX_VOLTAGE             (3300u)
+
+/**
+ * Minimum and maximum voltages for LD03
+ */
+#define AXP_192_LDO3_MIN_VOLTAGE             (1800u)
+#define AXP_192_LDO3_MAX_VOLTAGE             (3300u)
+
 #define AXP_192_REG12H_DCDC1_SWITCH_CONTROL_BIT           (1u << 0u)
+#define AXP_192_REG12H_LDO2_SWITCH_CONTROL_BIT            (1u << 2u)
+#define AXP_192_REG12H_LDO3_SWITCH_CONTROL_BIT            (1u << 3u)
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
@@ -48,6 +62,7 @@ static void Axp192_ReadI2cData();
 static void Axp192_WriteI2cData(uint8_t*, size_t);
 static void Axp192_ReadRegister(Axp192_RegisterType, uint8_t*);
 static void Axp192_WriteRegister(Axp192_RegisterType, uint8_t);
+static void Axp192_UpdatePowerOutputControlRegister(Axp192_StateType, uint8_t);
 /***************************************************************************************************
  * CONSTANTS
  **************************************************************************************************/
@@ -67,18 +82,7 @@ void Axp192_Init()
 
 void Axp192_SetDcDc1State(Axp192_StateType state)
 {
-  uint8_t registerValue;
-  Axp192_ReadRegister(Dcdc1_3AndLDO2_3SwitchControlRegister, &registerValue);
-  if (registerValue == Axp192_Off)
-  {
-    registerValue &= ~ AXP_192_REG12H_DCDC1_SWITCH_CONTROL_BIT;
-  }
-  else if (registerValue == Axp192_On)
-  {
-    registerValue |= AXP_192_REG12H_DCDC1_SWITCH_CONTROL_BIT;
-  }
-
-  Axp192_WriteRegister(Dcdc1_3AndLDO2_3SwitchControlRegister, registerValue);
+  Axp192_UpdatePowerOutputControlRegister(state, AXP_192_REG12H_DCDC1_SWITCH_CONTROL_BIT);
 }
 
 void Axp192_SetDcDc1Voltage(uint16_t voltage)
@@ -93,11 +97,80 @@ void Axp192_SetDcDc1Voltage(uint16_t voltage)
   }
   else
   {
-    /* Calculate register value based on a resolution of 25mV per bit */
-    voltage = voltage / 25;
+    /* Calculate register value based on a resolution of 25mV per bit and 0.7V offset */
+    voltage = (voltage - 700) / 25;
     Axp192_WriteRegister(Dcdc1VoltageSettingRegister, (uint8_t)voltage);
   }
 }
+
+void Axp192_SetLdo2State(Axp192_StateType state)
+{
+  Axp192_UpdatePowerOutputControlRegister(state, AXP_192_REG12H_LDO2_SWITCH_CONTROL_BIT);
+}
+
+void Axp192_SetLdo2Voltage(uint16_t voltage)
+{
+  if (voltage < AXP_192_LDO2_MIN_VOLTAGE)
+  {
+    AXP_192_PRINTF("Voltage below minimum voltage");
+  }
+  else if (voltage > AXP_192_LDO2_MAX_VOLTAGE)
+  {
+    AXP_192_PRINTF("Voltage below minimum voltage");
+  }
+  else
+  {
+    uint8_t registerValue;
+
+    Axp192_ReadRegister(LDO2_3_OutputVoltageSettingRegister, &registerValue);
+
+    /* Calculate register value based on a resolution of 100mV per bit and 1.8V offset */
+    voltage = (voltage - 1800) / 100;
+    voltage = (voltage << 4) & 0xF0;
+
+    /* Mask out voltage value from register */
+    registerValue &= 0x0F;
+
+    /* Set new voltage value */
+    registerValue |= voltage;
+    Axp192_WriteRegister(LDO2_3_OutputVoltageSettingRegister, registerValue);
+  }
+}
+
+void Axp192_SetLdo3State(Axp192_StateType state)
+{
+  Axp192_UpdatePowerOutputControlRegister(state, AXP_192_REG12H_LDO3_SWITCH_CONTROL_BIT);
+}
+
+void Axp192_SetLdo3Voltage(uint16_t voltage)
+{
+  if (voltage < AXP_192_LDO3_MIN_VOLTAGE)
+  {
+    AXP_192_PRINTF("Voltage below minimum voltage");
+  }
+  else if (voltage > AXP_192_LDO3_MAX_VOLTAGE)
+  {
+    AXP_192_PRINTF("Voltage below minimum voltage");
+  }
+  else
+  {
+    uint8_t registerValue;
+
+    Axp192_ReadRegister(LDO2_3_OutputVoltageSettingRegister, &registerValue);
+
+    /* Calculate register value based on a resolution of 100mV per bit and 1.8V offset */
+    voltage = (voltage - 1800) / 100;
+    voltage &= 0x0F;
+
+    /* Mask out voltage value from register */
+    registerValue &= 0xF0;
+
+    /* Set new voltage value */
+    registerValue |= voltage;
+    Axp192_WriteRegister(LDO2_3_OutputVoltageSettingRegister, registerValue);
+  }
+}
+
 
 static void Axp192_ReadRegister(Axp192_RegisterType registerAddress, uint8_t* buffer)
 {
@@ -168,4 +241,20 @@ static void Axp192_WriteI2cData(uint8_t* data, size_t dataLength)
   {
     i2c_cmd_link_delete(i2c_cmd_handle);
   }
+}
+
+static void Axp192_UpdatePowerOutputControlRegister(Axp192_StateType state, uint8_t bit)
+{
+  uint8_t registerValue;
+  Axp192_ReadRegister(Dcdc1_3AndLDO2_3SwitchControlRegister, &registerValue);
+  if (state == Axp192_Off)
+  {
+    registerValue &= ~ bit;
+  }
+  else if (state == Axp192_On)
+  {
+    registerValue |= bit;
+  }
+
+  Axp192_WriteRegister(Dcdc1_3AndLDO2_3SwitchControlRegister, registerValue);
 }
