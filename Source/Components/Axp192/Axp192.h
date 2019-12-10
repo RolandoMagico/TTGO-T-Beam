@@ -43,12 +43,18 @@ typedef enum
   DataBufferRegister4,
   DataBufferRegister5
 } Axp192_RegisterType;
+
+typedef enum
+{
+  Axp192_Off = 0,
+  Axp192_On = 1,
+} Axp192_StateType;
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
 extern void Axp192_InitMemory();
 extern void Axp192_Init();
-
+extern void Axp192_SetDcDc1State(Axp192_StateType state);
 
 
 #endif /* AXP192_AXP192_H_ */
