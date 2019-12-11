@@ -63,13 +63,26 @@ void app_main()
 
     /* TODO: Enable voltage on LDO2 for SX1276 LORA module */
 
+    /* TODO: Unclear if it is needed */
+    Axp192_SetLdo2State(Axp192_On);
+    Axp192_SetDcDc1State(Axp192_On);
+    Axp192_SetDcDc2State(Axp192_On);
+    Axp192_SetExtenState(Axp192_On);
+    Axp192_SetDcDc1Voltage(3300);
+    Axp192_SetDcDc2Voltage(2275);
+
     /* Enable voltage on LDO3 for NEO6 GPS module */
     Axp192_SetLdo3Voltage(3300);
     Axp192_SetLdo3State(Axp192_On);
 
     while (1)
     {
+      size_t gpsDataLength = 0;
       /* Intended endless loop */
+      if (Neo6_DataAvailable(&gpsDataLength) == Neo6_True)
+      {
+        printf("Received %d bytes\n", gpsDataLength);
+      }
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 

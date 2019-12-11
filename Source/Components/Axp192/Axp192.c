@@ -41,6 +41,12 @@
 #define AXP_192_DCDC1_MAX_VOLTAGE             (3500u)
 
 /**
+ * Minimum and maximum voltages for DC-DC2
+ */
+#define AXP_192_DCDC2_MIN_VOLTAGE             (700u)
+#define AXP_192_DCDC2_MAX_VOLTAGE             (2275u)
+
+/**
  * Minimum and maximum voltages for LD02
  */
 #define AXP_192_LDO2_MIN_VOLTAGE             (1800u)
@@ -55,6 +61,8 @@
 #define AXP_192_REG12H_DCDC1_SWITCH_CONTROL_BIT           (1u << 0u)
 #define AXP_192_REG12H_LDO2_SWITCH_CONTROL_BIT            (1u << 2u)
 #define AXP_192_REG12H_LDO3_SWITCH_CONTROL_BIT            (1u << 3u)
+#define AXP_192_REG12H_DCDC2_SWITCH_CONTROL_BIT           (1u << 4u)
+#define AXP_192_REG12H_EXTEN_SWITCH_CONTROL_BIT           (1u << 6u)
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
@@ -100,6 +108,29 @@ void Axp192_SetDcDc1Voltage(uint16_t voltage)
     /* Calculate register value based on a resolution of 25mV per bit and 0.7V offset */
     voltage = (voltage - 700) / 25;
     Axp192_WriteRegister(Dcdc1VoltageSettingRegister, (uint8_t)voltage);
+  }
+}
+
+void Axp192_SetDcDc2State(Axp192_StateType state)
+{
+  Axp192_UpdatePowerOutputControlRegister(state, AXP_192_REG12H_DCDC2_SWITCH_CONTROL_BIT);
+}
+
+void Axp192_SetDcDc2Voltage(uint16_t voltage)
+{
+  if (voltage < AXP_192_DCDC2_MIN_VOLTAGE)
+  {
+    AXP_192_PRINTF("Voltage below minimum voltage");
+  }
+  else if (voltage > AXP_192_DCDC2_MAX_VOLTAGE)
+  {
+    AXP_192_PRINTF("Voltage below minimum voltage");
+  }
+  else
+  {
+    /* Calculate register value based on a resolution of 25mV per bit and 0.7V offset */
+    voltage = (voltage - 700) / 25;
+    Axp192_WriteRegister(Dcdc2VoltageSettingRegister, (uint8_t)voltage);
   }
 }
 
@@ -171,6 +202,10 @@ void Axp192_SetLdo3Voltage(uint16_t voltage)
   }
 }
 
+void Axp192_SetExtenState(Axp192_StateType state)
+{
+  Axp192_UpdatePowerOutputControlRegister(state, AXP_192_REG12H_EXTEN_SWITCH_CONTROL_BIT);
+}
 
 static void Axp192_ReadRegister(Axp192_RegisterType registerAddress, uint8_t* buffer)
 {

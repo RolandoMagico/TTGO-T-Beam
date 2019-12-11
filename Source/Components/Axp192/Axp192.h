@@ -45,6 +45,7 @@ typedef enum
   DataBufferRegister5,
   ExtenAndDcdc2SwitchControlRegister = 0x10,
   Dcdc1_3AndLDO2_3SwitchControlRegister = 0x12,
+  Dcdc2VoltageSettingRegister = 0x23,
   Dcdc1VoltageSettingRegister = 0x26,
   LDO2_3_OutputVoltageSettingRegister = 0x28,
 } Axp192_RegisterType;
@@ -61,10 +62,14 @@ extern void Axp192_InitMemory();
 extern void Axp192_Init();
 extern void Axp192_SetDcDc1State(Axp192_StateType state);
 extern void Axp192_SetDcDc1Voltage(uint16_t voltage);
+extern void Axp192_SetDcDc2State(Axp192_StateType state);
+extern void Axp192_SetDcDc2Voltage(uint16_t voltage);
 extern void Axp192_SetLdo2State(Axp192_StateType state);
 extern void Axp192_SetLdo2Voltage(uint16_t voltage);
 extern void Axp192_SetLdo3State(Axp192_StateType state);
 extern void Axp192_SetLdo3Voltage(uint16_t voltage);
+extern void Axp192_SetExtenState(Axp192_StateType state);
+
 
 
 #endif /* AXP192_AXP192_H_ */
