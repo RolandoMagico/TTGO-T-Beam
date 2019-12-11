@@ -27,6 +27,7 @@
 #include "esp_spi_flash.h"
 
 #include "Axp192.h"
+#include "Neo6.h"
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
@@ -61,7 +62,10 @@ void app_main()
     /* Axp192_SetDcDc1State(Axp192_On); */
 
     /* TODO: Enable voltage on LDO2 for SX1276 LORA module */
-    /* TODO: Enable voltage on LDO3 for NEO6 GPS module */
+
+    /* Enable voltage on LDO3 for NEO6 GPS module */
+    Axp192_SetLdo3Voltage(3300);
+    Axp192_SetLdo3State(Axp192_On);
 
     while (1)
     {
@@ -81,9 +85,11 @@ void app_main()
 static void InitializeMemory()
 {
   Axp192_InitMemory();
+  Neo6_InitMemory();
 }
 
 static void InitializeComponents()
 {
   Axp192_Init();
+  Neo6_Init();
 }
