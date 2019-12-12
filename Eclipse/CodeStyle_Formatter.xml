@@ -150,7 +150,7 @@
 <setting id="org.eclipse.cdt.core.formatter.insert_space_after_opening_angle_bracket_in_template_parameters" value="do not insert"/>
 <setting id="org.eclipse.cdt.core.formatter.insert_space_before_closing_paren_in_switch" value="do not insert"/>
 <setting id="org.eclipse.cdt.core.formatter.alignment_for_expression_list" value="0"/>
-<setting id="org.eclipse.cdt.core.formatter.insert_space_before_opening_paren_in_method_invocation" value="insert"/>
+<setting id="org.eclipse.cdt.core.formatter.insert_space_before_opening_paren_in_method_invocation" value="do not insert"/>
 <setting id="org.eclipse.cdt.core.formatter.insert_space_before_colon_in_conditional" value="insert"/>
 <setting id="org.eclipse.cdt.core.formatter.insert_space_before_unary_operator" value="do not insert"/>
 <setting id="org.eclipse.cdt.core.formatter.insert_space_after_comma_in_array_initializer" value="insert"/>
