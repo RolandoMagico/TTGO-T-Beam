@@ -9,5 +9,8 @@ Playground for TTGO T-Beam board 1.0
 - Import the project in the folder "Source" into Eclipse
 
 ## Links
-- [TTGO T-Beam Product page](http://www.lilygo.cn/prod_view.aspx?TypeId=50033&Id=1074&FId=t3:50033:3)
-- [AXP 192 Product page](http://www.x-powers.com/en.php/Info/product_detail/article_id/29)
+- [TTGO T-Beam Product Page](http://www.lilygo.cn/prod_view.aspx?TypeId=50033&Id=1074&FId=t3:50033:3)
+- [AXP 192 Product Page](http://www.x-powers.com/en.php/Info/product_detail/article_id/29)
+- [ESP IDF on GitHub](https://github.com/espressif/esp-idf)
+- [TTGO T-Beam TTN Tracker on Github](https://github.com/kizniche/ttgo-tbeam-ttn-tracker)
+- [Neo6 GPS Product Page](https://www.u-blox.com/en/product/neo-6-series)
