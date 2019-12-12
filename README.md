@@ -11,3 +11,4 @@ Playground for TTGO T-Beam board 1.0
 ## Links
 - [TTGO T-Beam Product page](http://www.lilygo.cn/prod_view.aspx?TypeId=50033&Id=1074&FId=t3:50033:3)
 - [AXP 192 Product page](http://www.x-powers.com/en.php/Info/product_detail/article_id/29)
+- [ESP IDF on GitHub](https://github.com/espressif/esp-idf)
