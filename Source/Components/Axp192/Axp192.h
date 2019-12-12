@@ -45,6 +45,8 @@ typedef enum
   Dcdc2VoltageSettingRegister = 0x23,
   Dcdc1VoltageSettingRegister = 0x26,
   LDO2_3_OutputVoltageSettingRegister = 0x28,
+  BatteryVoltageHigh8Bit = 0x78,
+  BatteryVoltageLow4Bit,
 } Axp192_RegisterType;
 
 typedef enum
@@ -66,7 +68,7 @@ extern void Axp192_SetLdo2Voltage(uint16_t voltage);
 extern void Axp192_SetLdo3State(Axp192_StateType state);
 extern void Axp192_SetLdo3Voltage(uint16_t voltage);
 extern void Axp192_SetExtenState(Axp192_StateType state);
-
+extern uint16_t Axp192_GetBatteryVoltage();
 
 
 #endif /* AXP192_AXP192_H_ */

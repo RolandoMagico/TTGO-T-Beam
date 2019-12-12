@@ -204,6 +204,18 @@ void Axp192_SetExtenState(Axp192_StateType state)
   Axp192_UpdatePowerOutputControlRegister(state, AXP_192_REG12H_EXTEN_SWITCH_CONTROL_BIT);
 }
 
+uint16_t Axp192_GetBatteryVoltage()
+{
+  uint8_t batteryVoltageLow;
+  uint8_t batteryVoltageHigh;
+
+  Axp192_ReadRegister(BatteryVoltageLow4Bit, &batteryVoltageLow);
+  Axp192_ReadRegister(BatteryVoltageHigh8Bit, &batteryVoltageHigh);
+
+  return (((uint16_t)batteryVoltageHigh) << 4) | (batteryVoltageLow & 0x0F);
+
+}
+
 static void Axp192_ReadRegister(Axp192_RegisterType registerAddress, uint8_t* buffer)
 {
   uint8_t txData = registerAddress;
