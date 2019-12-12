@@ -23,7 +23,7 @@
 /***************************************************************************************************
  * INCLUDES
  **************************************************************************************************/
-#include <stddef.h>
+#include <esp_types.h>
 /***************************************************************************************************
  * DEFINES
  **************************************************************************************************/
@@ -42,4 +42,6 @@ typedef enum
 extern void Neo6_InitMemory();
 extern void Neo6_Init();
 extern Neo6_BoolType Neo6_DataAvailable(size_t* dataLength);
+extern int Neo6_GetReceivedData(uint8_t* buffer, uint32_t bufferLength);
+extern void Neo6_MainFunction();
 #endif /* COMPONENTS_NEO6_NEO6_H_ */
