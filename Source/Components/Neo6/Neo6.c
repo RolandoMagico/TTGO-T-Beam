@@ -103,9 +103,8 @@ void Neo6_MainFunction()
     if (Neo6_ReceiveTimeoutCounter > 2)
     {
       /* No data received since the last call */
-      if ((Neo6_ReceiveBufferPosition != 0) &&                      /* Check if there are received data */
-          (Neo6_ReadBuffer[0] = '$') &&                             /* Check for a valid start delimiter */
-          (Neo6_ReadBuffer[Neo6_ReceiveBufferPosition - 1] = '\n')) /* Check for a valid end delimiter */
+      if ((Neo6_ReceiveBufferPosition != 0) &&                          /* Check if there are received data */
+          (Neo6_RecveiveBuffer[Neo6_ReceiveBufferPosition - 1] == '\n')) /* Check for a valid end delimiter */
       {
         /* Assume that data reception is complete and copy date to the read buffer */
         Neo6_MemCopy(Neo6_RecveiveBuffer, Neo6_ReadBuffer, Neo6_ReceiveBufferPosition);
@@ -119,7 +118,17 @@ void Neo6_MainFunction()
   else if ((Neo6_ReceiveBufferPosition + dataLength) < NEO6_UART_BUFFER_SIZE)
   {
     uart_read_bytes(NEO6_UART_PERIPHERAL, &(Neo6_RecveiveBuffer[Neo6_ReceiveBufferPosition]), dataLength, 1);
-    Neo6_ReceiveBufferPosition += dataLength;
+
+    /* Check for a valid start delimiter */
+    if (Neo6_RecveiveBuffer[0] == '$')
+    {
+      Neo6_ReceiveBufferPosition += dataLength;
+    }
+    else
+    {
+      Neo6_ReceiveBufferPosition = 0;
+    }
+
     Neo6_ReceiveTimeoutCounter = 0;
   }
   else
