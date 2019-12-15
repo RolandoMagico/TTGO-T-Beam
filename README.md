@@ -7,6 +7,7 @@ Playground for TTGO T-Beam board 1.0
 
 ## Usage
 - Import the project in the folder "Source" into Eclipse
+- Copy Source/main/\_TheThingsNetwork_Cfg.h to TheThingsNetwork_Cfg.h and adapt the settings
 
 ## Links
 - [TTGO T-Beam Product Page](http://www.lilygo.cn/prod_view.aspx?TypeId=50033&Id=1074&FId=t3:50033:3)
