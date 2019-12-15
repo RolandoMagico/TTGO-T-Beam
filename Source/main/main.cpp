@@ -22,21 +22,36 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
+#include "nvs_flash.h"
 
+extern "C" {
 #include "Axp192.h"
 #include "Neo6.h"
+}
+
+#include "TheThingsNetwork.h"
+#include "TheThingsNetwork_Cfg.h"
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
 static void InitializeMemory();
 static void InitializeComponents();
-static void Task100ms();
-static void Task1000ms();
+static void Task100ms(void *pvParameters);
+static void Task1000ms(void *pvParameters);
 static UBaseType_t TaskStackMonitoring(UBaseType_t lastRemainingStack);
+
+/***************************************************************************************************
+ * CONSTANTS
+ **************************************************************************************************/
+
+/***************************************************************************************************
+ * VARIABLES
+ **************************************************************************************************/
+static TheThingsNetwork ttn;
 /***************************************************************************************************
  * IMPLEMENTATION
  **************************************************************************************************/
-void app_main()
+extern "C" void app_main()
 {
   /* Print chip information */
   esp_chip_info_t chip_info;
@@ -63,8 +78,8 @@ void app_main()
   Axp192_SetLdo3Voltage(3300);
   Axp192_SetLdo3State(Axp192_On);
 
-  if ((xTaskCreatePinnedToCore(Task100ms, "Task100ms", 4096, NULL, 10, NULL, 0) == pdPASS)
-      && (xTaskCreatePinnedToCore(Task1000ms, "Task1000ms", 4096, NULL, 10, NULL, 0) == pdPASS))
+  if ((xTaskCreatePinnedToCore(Task100ms, "Task100ms", 4096, NULL, 10, NULL, 0) == pdPASS) &&
+      (xTaskCreatePinnedToCore(Task1000ms, "Task1000ms", 4096, NULL, 10, NULL, 0) == pdPASS))
   {
     /* The task was created.  Use the task's handle to delete the task. */
     vTaskDelete(NULL);
@@ -92,6 +107,25 @@ static void InitializeComponents()
 {
   Axp192_Init();
   Neo6_Init();
+
+  /* NVS is required for storing LoRa data */
+  ESP_ERROR_CHECK(nvs_flash_init());
+
+  // Initialize SPI bus
+  spi_bus_config_t spi_bus_config;
+  spi_bus_config.miso_io_num = TTN_PIN_SPI_MISO;
+  spi_bus_config.mosi_io_num = TTN_PIN_SPI_MOSI;
+  spi_bus_config.sclk_io_num = TTN_PIN_SPI_SCLK;
+  spi_bus_config.quadwp_io_num = -1;
+  spi_bus_config.quadhd_io_num = -1;
+  spi_bus_config.max_transfer_sz = 0;
+  ESP_ERROR_CHECK(spi_bus_initialize(TTN_SPI_HOST, &spi_bus_config, TTN_SPI_DMA_CHAN));
+
+  // Configure the SX127x pins
+  ttn.configurePins(TTN_SPI_HOST, TTN_PIN_NSS, TTN_PIN_RXTX, TTN_PIN_RST, TTN_PIN_DIO0, TTN_PIN_DIO1);
+
+  // The below line can be commented after the first run as the data is saved in NVS
+  ttn.provision(TTN_DEVICE_EUI, TTN_APPLICATION_EUI, TTN_APPLICATION_SESSION_KEY);
 }
 
 static void Task100ms(void *pvParameters)
@@ -123,7 +157,7 @@ static void Task100ms(void *pvParameters)
   }
 }
 
-static void Task1000ms()
+static void Task1000ms(void *pvParameters)
 {
   TickType_t xLastWakeTime = xTaskGetTickCount();
   UBaseType_t remainingTaskStack = INT32_MAX;

@@ -1,0 +1,137 @@
+menu "The Things Network"
+
+choice TTN_LORA_FREQ
+    prompt "TTN LoRa frequency / region"
+    default TTN_LORA_FREQ_DISABLED
+    help
+        LoRa frequency must match the geographic region the device is operated in.
+        Running it with the incorrect frequency most likely violates the law.
+
+config TTN_LORA_FREQ_DISABLED
+    bool "LoRa Disabled"
+
+config TTN_LORA_FREQ_EU_868
+    bool "Europe (868 MHz)"
+
+config TTN_LORA_FREQ_US_915
+    bool "North and South America (915 MHz)"
+
+config TTN_LORA_FREQ_AU_921
+    bool "Australia (921 MHz)"
+
+config TTN_LORA_FREQ_AS_923
+    bool "Asia (923 MHz)"
+
+config TTN_LORA_FREQ_AS_923_JP
+    bool "Asia, region Japan (923 MHz)"
+
+config TTN_LORA_FREQ_KR_920
+    bool "South Korea (920 MHz)"
+
+config TTN_LORA_FREQ_IN_866
+    bool "India (866 MHz)"
+
+endchoice
+
+choice TTN_RADIO_CHIP
+    prompt "TTN radio chip"
+    default TTN_RADIO_SX1276_77_78_79
+    help
+        The chip type used for LoRa radio.
+        Most boards use the SX1276 .. SX1279 chips. This includes ttgo LoRa and HopeRF RFM95 boards.
+        Earlier boards might use the SX1272 / 73 chips, e.g. the HopeRF RFM92.
+
+config TTN_RADIO_SX1272_73
+    bool "Semtech SX1272 / SX1273"
+
+config TTN_RADIO_SX1276_77_78_79
+    bool "Semtech SX1276 / SX1277 / SX1278 / SX1279"
+
+endchoice
+
+config TTN_SPI_FREQ
+    int "SPI frequency (in Hz)"
+    default 10000000
+    help
+        SPI frequency to communicate between ESP32 and SX127x radio chip
+
+config TTN_BG_TASK_PRIO
+    int "Background task priority"
+    default 10
+    help
+        Priority of task running in the background and communicating with
+        the LoRaWAN radio chip. It needs a high priority as the timing is crucial.
+        Higher numbers indicate higher priority.
+
+
+choice TTN_PROVISION_UART
+    prompt "AT commands"
+    default TTN_PROVISION_UART_DEFAULT
+    help
+        Select whether to listen on UART for AT commands.
+        
+        - Default is to use UART0 on pins GPIO1(TX) and GPIO3(RX).
+        - If "Custom" is selected, UART0 or UART1 can be chosen,
+          and any pins can be selected.
+        - If "None" is selected, AT commands are not available.
+
+config TTN_PROVISION_UART_DEFAULT
+    bool "Enabled - default settings: UART0, TX=GPIO1, RX=GPIO3, 115,200 baud"
+config TTN_PROVISION_UART_CUSTOM
+    bool "Enabled - custom UART settings"
+config TTN_PROVISION_UART_NONE
+    bool "Disabled"
+endchoice
+
+choice TTN_PROVISION_UART_NUM
+    prompt "UART peripheral for provisioning (0-1)"
+    depends on TTN_PROVISION_UART_CUSTOM
+    default TTN_PROVISION_UART_CUSTOM_NUM_0
+
+config TTN_PROVISION_UART_CUSTOM_NUM_0
+    bool "UART0"
+config TTN_PROVISION_UART_CUSTOM_NUM_1
+    bool "UART1"
+endchoice
+
+choice TTN_PROVISION_UART_CONFIG
+    prompt "Configure UART settings"
+    default TTN_PROVISION_UART_CONFIG_NO
+    depends on TTN_PROVISION_UART_CUSTOM
+    help
+        Select whether to configure the UART, i.e. set the baud rate, the RX and TX
+        pins. If the UART is shared with other features (e.g. the console), it
+        should not be configured. 
+
+config TTN_PROVISION_UART_CONFIG_NO
+    bool "No"
+config TTN_PROVISION_UART_CONFIG_YES
+    bool "Yes"
+endchoice
+
+config TTN_PROVISION_UART_NUM
+    int
+    default 0 if TTN_PROVISION_UART_DEFAULT || TTN_PROVISION_UART_NONE
+    default 0 if TTN_PROVISION_UART_CUSTOM_NUM_0
+    default 1 if TTN_PROVISION_UART_CUSTOM_NUM_1
+
+config TTN_PROVISION_UART_TX_GPIO
+    int "Provisioning UART TX on GPIO#"
+    depends on TTN_PROVISION_UART_CONFIG_YES
+    range 0 33
+    default 1
+
+config TTN_PROVISION_UART_RX_GPIO
+    int "Provisioning UART RX on GPIO#"
+    depends on TTN_PROVISION_UART_CONFIG_YES
+    range 0 39
+    default 3
+
+config TTN_PROVISION_UART_BAUDRATE
+    int "Provisioning UART baud rate"
+    depends on TTN_PROVISION_UART_CONFIG_YES
+    range 1200 4000000
+    default 115200
+
+
+endmenu
