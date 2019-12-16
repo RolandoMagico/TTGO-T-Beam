@@ -46,8 +46,10 @@
 /**
  * Minimum and maximum voltages for LD02
  */
-#define AXP_192_LDO2_MIN_VOLTAGE             (1800u)
-#define AXP_192_LDO2_MAX_VOLTAGE             (3300u)
+#define AXP_192_LDO2_MIN_VOLTAGE              (1800u)
+#define AXP_192_LDO2_MAX_VOLTAGE              (3300u)
+#define AXP_192_LDO2_OFFSET                   (1800u)
+#define AXP_192_LDO2_FACTOR                   (100u)
 
 /**
  * Minimum and maximum voltages for LD03
@@ -170,6 +172,18 @@ void Axp192_SetLdo3State(Axp192_StateType state)
   Axp192_UpdatePowerOutputControlRegister(state, AXP_192_REG12H_LDO3_SWITCH_CONTROL_BIT);
 }
 
+uint16_t Axp192_GetLdo3Voltage()
+{
+    uint8_t registerValue;
+    uint16_t voltage;
+    Axp192_ReadRegister(LDO2_3_OutputVoltageSettingRegister, &registerValue);
+
+    voltage = registerValue & 0x0F;
+    voltage = AXP_192_LDO2_OFFSET + (AXP_192_LDO2_FACTOR * voltage);
+
+    return voltage;
+}
+
 void Axp192_SetLdo3Voltage(uint16_t voltage)
 {
   if (voltage < AXP_192_LDO3_MIN_VOLTAGE)
@@ -187,7 +201,7 @@ void Axp192_SetLdo3Voltage(uint16_t voltage)
     Axp192_ReadRegister(LDO2_3_OutputVoltageSettingRegister, &registerValue);
 
     /* Calculate register value based on a resolution of 100mV per bit and 1.8V offset */
-    voltage = (voltage - 1800) / 100;
+    voltage = (voltage - AXP_192_LDO2_OFFSET) / AXP_192_LDO2_FACTOR;
     voltage &= 0x0F;
 
     /* Mask out voltage value from register */

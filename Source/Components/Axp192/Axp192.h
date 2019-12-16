@@ -66,6 +66,7 @@ extern void Axp192_SetDcDc2Voltage(uint16_t voltage);
 extern void Axp192_SetLdo2State(Axp192_StateType state);
 extern void Axp192_SetLdo2Voltage(uint16_t voltage);
 extern void Axp192_SetLdo3State(Axp192_StateType state);
+extern uint16_t Axp192_GetLdo3Voltage();
 extern void Axp192_SetLdo3Voltage(uint16_t voltage);
 extern void Axp192_SetExtenState(Axp192_StateType state);
 extern uint16_t Axp192_GetBatteryVoltage();
