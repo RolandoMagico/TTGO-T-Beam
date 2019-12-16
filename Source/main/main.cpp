@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_log.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "nvs_flash.h"
@@ -165,10 +166,12 @@ static void Task1000ms(void *pvParameters)
   TickType_t xLastWakeTime = xTaskGetTickCount();
   UBaseType_t remainingTaskStack = INT32_MAX;
   uint16_t lastBatteryVoltage = UINT16_MAX;
+  uint16_t Task1000ms_SecondCounter = 0;
   for (;;)
   {
     // Wait for the next cycle.
     vTaskDelayUntil(&xLastWakeTime, 1000 / portTICK_PERIOD_MS);
+    Task1000ms_SecondCounter++;
     remainingTaskStack = TaskStackMonitoring(remainingTaskStack);
 
     uint16_t currentBatteryVoltage = Axp192_GetBatteryVoltage();
@@ -178,6 +181,11 @@ static void Task1000ms(void *pvParameters)
     }
 
     lastBatteryVoltage = currentBatteryVoltage;
+    if ((Task1000ms_SecondCounter % 10) == 0)
+    {
+      ESP_LOGI(__FUNCTION__, "Sending TTN data");
+      ttn.transmitMessage((uint8_t*)&lastBatteryVoltage, 2, 1, false);
+    }
   }
 }
 

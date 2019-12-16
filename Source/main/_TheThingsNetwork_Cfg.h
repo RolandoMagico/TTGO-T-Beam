@@ -35,7 +35,7 @@
 
 /* Non SPI pins */
 #define TTN_PIN_RXTX                    (TTN_NOT_CONNECTED)
-#define TTN_PIN_RST                     (GPIO_NUM_14)
+#define TTN_PIN_RST                     (GPIO_NUM_23)
 #define TTN_PIN_DIO0                    (GPIO_NUM_26)
 #define TTN_PIN_DIO1                    (GPIO_NUM_33)
 
