@@ -111,6 +111,9 @@ static void InitializeComponents()
   /* NVS is required for storing LoRa data */
   ESP_ERROR_CHECK(nvs_flash_init());
 
+  // Initialize the GPIO ISR handler service
+  ESP_ERROR_CHECK(gpio_install_isr_service(ESP_INTR_FLAG_IRAM));
+
   // Initialize SPI bus
   spi_bus_config_t spi_bus_config;
   spi_bus_config.miso_io_num = TTN_PIN_SPI_MISO;
