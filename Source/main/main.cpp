@@ -28,6 +28,7 @@
 extern "C" {
 #include "Axp192.h"
 #include "Neo6.h"
+#include "Display.h"
 }
 
 #include "TheThingsNetwork.h"
@@ -102,12 +103,18 @@ static void InitializeMemory()
 {
   Axp192_InitMemory();
   Neo6_InitMemory();
+  Display_InitMemory();
 }
 
 static void InitializeComponents()
 {
   Axp192_Init();
   Neo6_Init();
+
+  /* Enable voltage on DCDC1 for display */
+  Axp192_SetDcDc1Voltage(2500);
+  Axp192_SetDcDc1State(Axp192_On);
+  Display_Init();
 
   /* NVS is required for storing LoRa data */
   ESP_ERROR_CHECK(nvs_flash_init());
@@ -181,7 +188,7 @@ static void Task1000ms(void *pvParameters)
     }
 
     lastBatteryVoltage = currentBatteryVoltage;
-    if ((Task1000ms_SecondCounter % 10) == 0)
+    if ((Task1000ms_SecondCounter % 1000) == 0)
     {
       ESP_LOGI(__FUNCTION__, "Sending TTN data");
       ttn.transmitMessage((uint8_t*)&lastBatteryVoltage, 2, 1, false);
