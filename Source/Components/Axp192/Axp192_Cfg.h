@@ -35,13 +35,6 @@
  */
 #define AXP_192_I2C_PORT                             (I2C_NUM_0)
 
-/**
- * Enable/disable debug output. Define either
- * AXP_192_DEBUG_OUTPUT_ENABLED
- * or
- * AXP_192_DEBUG_OUTPUT_DISABLED
- */
-#define AXP_192_DEBUG_OUTPUT_ENABLED
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
