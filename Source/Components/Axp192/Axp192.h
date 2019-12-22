@@ -45,6 +45,7 @@ typedef enum
   Dcdc2VoltageSettingRegister = 0x23,
   Dcdc1VoltageSettingRegister = 0x26,
   LDO2_3_OutputVoltageSettingRegister = 0x28,
+  ChargeControlRegister1 = 0x33,
   BatteryVoltageHigh8Bit = 0x78,
   BatteryVoltageLow4Bit,
   BatteryChargeCurrentHigh8Bit = 0x7A,
@@ -75,6 +76,14 @@ typedef enum
   Axp192_AdcSampelRate100Hz = 100,
   Axp192_AdcSampelRate200Hz = 200,
 } Axp192_AdcSamplingRateType;
+
+typedef enum
+{
+  Axp192_ChargeTargetVoltage4100mV = 0,
+  Axp192_ChargeTargetVoltage4150mV = 1,
+  Axp192_ChargeTargetVoltage4200mV = 2,
+  Axp192_ChargeTargetVoltage4360mV = 3,
+} Axp192_ChargeTargetVoltageType;
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
@@ -95,6 +104,7 @@ extern uint16_t Axp192_GetBatteryChargeCurrent();
 extern uint16_t Axp192_GetBatteryDischargeCurrent();
 extern uint32_t Axp192_GetBatteryCharge();
 extern Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate();
-
+extern Axp192_StateType Axp192_GetChargeFunctionState();
+extern Axp192_ChargeTargetVoltageType Axp192_GetChargeTargetVoltage();
 
 #endif /* AXP192_AXP192_H_ */

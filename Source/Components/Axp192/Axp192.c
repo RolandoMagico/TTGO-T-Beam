@@ -281,6 +281,20 @@ extern Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate()
   return returnValue;
 }
 
+Axp192_StateType Axp192_GetChargeFunctionState()
+{
+  uint8_t registerValue;
+  Axp192_ReadRegister(ChargeControlRegister1, &registerValue);
+  return (Axp192_StateType)((registerValue >> 7) & 0x01);
+}
+
+Axp192_ChargeTargetVoltageType Axp192_GetChargeTargetVoltage()
+{
+  uint8_t registerValue;
+  Axp192_ReadRegister(ChargeControlRegister1, &registerValue);
+  return (Axp192_StateType)((registerValue >> 5) & 0x03);
+}
+
 static void Axp192_ReadRegister(Axp192_RegisterType registerAddress, uint8_t* buffer)
 {
   uint8_t txData = registerAddress;
