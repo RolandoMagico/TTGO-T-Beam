@@ -51,18 +51,25 @@
 #define AXP_192_LDO3_MIN_VOLTAGE             (1800u)
 #define AXP_192_LDO3_MAX_VOLTAGE             (3300u)
 
-#define AXP_192_REG12H_DCDC1_SWITCH_CONTROL_BIT           (1u << 0u)
-#define AXP_192_REG12H_LDO2_SWITCH_CONTROL_BIT            (1u << 2u)
-#define AXP_192_REG12H_LDO3_SWITCH_CONTROL_BIT            (1u << 3u)
-#define AXP_192_REG12H_DCDC2_SWITCH_CONTROL_BIT           (1u << 4u)
-#define AXP_192_REG12H_EXTEN_SWITCH_CONTROL_BIT           (1u << 6u)
+/**
+ * Maximum value of the timer.
+ */
+#define AXP_192_TIMER_MAX_VALUE              (127u)
+
+#define AXP_192_REG12H_DCDC1_SWITCH_CONTROL_BIT           (0u)
+#define AXP_192_REG12H_LDO2_SWITCH_CONTROL_BIT            (2u)
+#define AXP_192_REG12H_LDO3_SWITCH_CONTROL_BIT            (3u)
+#define AXP_192_REG12H_DCDC2_SWITCH_CONTROL_BIT           (4u)
+#define AXP_192_REG12H_EXTEN_SWITCH_CONTROL_BIT           (6u)
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
 static void Axp192_ReadI2cData();
 static void Axp192_WriteI2cData(uint8_t*, size_t);
 static void Axp192_ReadRegister(Axp192_RegisterType, uint8_t*);
+static uint8_t Axp192_ReadRegister1Bit(Axp192_RegisterType registerAddress, uint8_t bitPosition);
 static void Axp192_WriteRegister(Axp192_RegisterType, uint8_t);
+static void Axp192_WriteRegister1Bit(Axp192_RegisterType registerAddress, uint8_t bitPosition, uint8_t value);
 static void Axp192_UpdatePowerOutputControlRegister(Axp192_StateType, uint8_t);
 static uint16_t Axp192_GetCurrentValue(Axp192_RegisterType highRegister, Axp192_RegisterType lowRegister);
 static uint32_t Axp192_GetColumbMeterData(Axp192_RegisterType bit31To24Register, Axp192_RegisterType bit23To16Register, Axp192_RegisterType bit15To08Register, Axp192_RegisterType bit07To00Register);
@@ -96,7 +103,7 @@ void Axp192_SetDcDc1Voltage(uint16_t voltage)
   }
   else if (voltage > AXP_192_DCDC1_MAX_VOLTAGE)
   {
-    ESP_LOGE(__FUNCTION__, "Voltage below minimum voltage");
+    ESP_LOGE(__FUNCTION__, "Voltage beyond minimum voltage");
   }
   else
   {
@@ -119,7 +126,7 @@ void Axp192_SetDcDc2Voltage(uint16_t voltage)
   }
   else if (voltage > AXP_192_DCDC2_MAX_VOLTAGE)
   {
-    ESP_LOGE(__FUNCTION__, "Voltage below minimum voltage");
+    ESP_LOGE(__FUNCTION__, "Voltage beyond minimum voltage");
   }
   else
   {
@@ -142,7 +149,7 @@ void Axp192_SetLdo2Voltage(uint16_t voltage)
   }
   else if (voltage > AXP_192_LDO2_MAX_VOLTAGE)
   {
-    ESP_LOGE(__FUNCTION__, "Voltage below minimum voltage");
+    ESP_LOGE(__FUNCTION__, "Voltage beyond minimum voltage");
   }
   else
   {
@@ -188,7 +195,7 @@ void Axp192_SetLdo3Voltage(uint16_t voltage)
   }
   else if (voltage > AXP_192_LDO3_MAX_VOLTAGE)
   {
-    ESP_LOGE(__FUNCTION__, "Voltage below minimum voltage");
+    ESP_LOGE(__FUNCTION__, "Voltage beyond minimum voltage");
   }
   else
   {
@@ -257,7 +264,7 @@ uint32_t Axp192_GetBatteryCharge()
   return 65536 / 2 * (chargeColumbMeterData - dischargeColumbMeterData) / 3600 / Axp192_GetAdcSamplingRate();
 }
 
-extern Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate()
+Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate()
 {
   uint8_t registerValue;
   Axp192_AdcSamplingRateType returnValue;
@@ -283,9 +290,7 @@ extern Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate()
 
 Axp192_StateType Axp192_GetChargeFunctionState()
 {
-  uint8_t registerValue;
-  Axp192_ReadRegister(Axp192_ChargeControlRegister1, &registerValue);
-  return (Axp192_StateType)((registerValue >> 7) & 0x01);
+  return (Axp192_StateType)Axp192_ReadRegister1Bit(Axp192_ChargeControlRegister1, 7);
 }
 
 Axp192_ChargeTargetVoltageType Axp192_GetChargeTargetVoltage()
@@ -293,6 +298,38 @@ Axp192_ChargeTargetVoltageType Axp192_GetChargeTargetVoltage()
   uint8_t registerValue;
   Axp192_ReadRegister(Axp192_ChargeControlRegister1, &registerValue);
   return (Axp192_StateType)((registerValue >> 5) & 0x03);
+}
+
+Axp192_PowerModeType Axp192_GetPowerMode()
+{
+  return (Axp192_PowerModeType)Axp192_ReadRegister1Bit(Axp192_PowerMode_ChargeStatusRegister, 1);
+}
+
+Axp192_StateType Axp192_GetPwronWakeupFunctionState()
+{
+  return (Axp192_StateType)Axp192_ReadRegister1Bit(Axp192_VoffShutdownVoltageSettingRegister, 3);
+}
+
+void Axp192_SetPwronWakeupFunctionState(Axp192_StateType state)
+{
+  Axp192_WriteRegister1Bit(Axp192_VoffShutdownVoltageSettingRegister, 3, state);
+}
+
+void Axp192_Shutdown()
+{
+  Axp192_WriteRegister1Bit(Axp192_ShutdownBatteryDetectionChargeLedControlRegister, 7, 1);
+}
+
+void Axp192_SetTimer(uint8_t minutes)
+{
+  if (minutes > AXP_192_TIMER_MAX_VALUE)
+  {
+    ESP_LOGE(__FUNCTION__, "Timout beyond maximum voltage");
+  }
+  else
+  {
+    Axp192_WriteRegister(Axp192_TimerControlRegister, minutes);
+  }
 }
 
 static void Axp192_ReadRegister(Axp192_RegisterType registerAddress, uint8_t* buffer)
@@ -306,6 +343,29 @@ static void Axp192_WriteRegister(Axp192_RegisterType registerAddress, uint8_t da
 {
   uint8_t txData[2] = { registerAddress, data };
   Axp192_WriteI2cData(txData, 2);
+}
+
+static uint8_t Axp192_ReadRegister1Bit(Axp192_RegisterType registerAddress, uint8_t bitPosition)
+{
+  uint8_t registerValue;
+ Axp192_ReadRegister(registerAddress, &registerValue);
+ return ((registerValue >> bitPosition) & 0x01);
+}
+
+static void Axp192_WriteRegister1Bit(Axp192_RegisterType registerAddress, uint8_t bitPosition, uint8_t value)
+{
+  uint8_t registerValue;
+  Axp192_ReadRegister(registerAddress, &registerValue);
+  if (value == 0)
+  {
+    registerValue &= ~ (1 << bitPosition);
+  }
+  else if (value == 1)
+  {
+    registerValue |= (1 << bitPosition);
+  }
+
+  Axp192_WriteRegister(registerAddress, registerValue);
 }
 
 static void Axp192_ReadI2cData(uint8_t* buffer, size_t bufferLength)
@@ -332,18 +392,7 @@ static void Axp192_WriteI2cData(uint8_t* data, size_t dataLength)
 
 static void Axp192_UpdatePowerOutputControlRegister(Axp192_StateType state, uint8_t bit)
 {
-  uint8_t registerValue;
-  Axp192_ReadRegister(Axp192_Dcdc1_3AndLDO2_3SwitchControlRegister, &registerValue);
-  if (state == Axp192_Off)
-  {
-    registerValue &= ~ bit;
-  }
-  else if (state == Axp192_On)
-  {
-    registerValue |= bit;
-  }
-
-  Axp192_WriteRegister(Axp192_Dcdc1_3AndLDO2_3SwitchControlRegister, registerValue);
+  Axp192_WriteRegister1Bit(Axp192_Dcdc1_3AndLDO2_3SwitchControlRegister, bit, state);
 }
 
 static uint16_t Axp192_GetCurrentValue(Axp192_RegisterType highRegister, Axp192_RegisterType lowRegister)

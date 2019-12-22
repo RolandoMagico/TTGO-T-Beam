@@ -32,7 +32,7 @@
 typedef enum
 {
   Axp192_PowerStatusRegister,
-  Axp192_PowerMode_ChargeStatusRegiser,
+  Axp192_PowerMode_ChargeStatusRegister,
   Axp192_OtgVbusStatusRegister = 0x04,
   Axp192_DataBufferRegister0 = 0x06,
   Axp192_DataBufferRegister1,
@@ -45,6 +45,8 @@ typedef enum
   Axp192_Dcdc2VoltageSettingRegister = 0x23,
   Axp192_Dcdc1VoltageSettingRegister = 0x26,
   Axp192_LDO2_3_OutputVoltageSettingRegister = 0x28,
+  Axp192_VoffShutdownVoltageSettingRegister = 0x31,
+  Axp192_ShutdownBatteryDetectionChargeLedControlRegister = 0x32,
   Axp192_ChargeControlRegister1 = 0x33,
   Axp192_BatteryVoltageHigh8Bit = 0x78,
   Axp192_BatteryVoltageLow4Bit,
@@ -53,6 +55,7 @@ typedef enum
   Axp192_BatteryDischargeCurrentHigh8Bit = 0x7C,
   Axp192_BatteryDischargeCurrentLow5Bit,
   Axp192_AdcSampleRateRegisterAndTsPinControlRegister = 0x84,
+  Axp192_TimerControlRegister = 0x8A,
   Axp192_BatteryChargingCoulombMeterDataRegister31to24 = 0xB0,
   Axp192_BatteryChargingCoulombMeterDataRegister21to16 = 0xB1,
   Axp192_BatteryChargingCoulombMeterDataRegister15to08 = 0xB2,
@@ -84,6 +87,12 @@ typedef enum
   Axp192_ChargeTargetVoltage4200mV = 2,
   Axp192_ChargeTargetVoltage4360mV = 3,
 } Axp192_ChargeTargetVoltageType;
+
+typedef enum
+{
+  Axp192_PowerModeA = 0,
+  Axp192_PowerModeB = 1,
+} Axp192_PowerModeType;
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
@@ -106,5 +115,9 @@ extern uint32_t Axp192_GetBatteryCharge();
 extern Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate();
 extern Axp192_StateType Axp192_GetChargeFunctionState();
 extern Axp192_ChargeTargetVoltageType Axp192_GetChargeTargetVoltage();
-
+extern Axp192_PowerModeType Axp192_GetPowerMode();
+extern Axp192_StateType Axp192_GetPwronWakeupFunctionState();
+extern void Axp192_SetPwronWakeupFunctionState(Axp192_StateType state);
+extern void Axp192_Shutdown();
+extern void Axp192_SetTimer(uint8_t minutes);
 #endif /* AXP192_AXP192_H_ */
