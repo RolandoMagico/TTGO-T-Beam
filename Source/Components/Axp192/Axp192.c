@@ -385,6 +385,11 @@ void Axp192_SetAdcState(Axp192_AdcType adc, Axp192_StateType state)
   }
 }
 
+void Axp192_SetCoulombSwitchControlState(Axp192_StateType state)
+{
+  Axp192_WriteRegister1Bit(Axp192_CoulombControlRegister, 7, state);
+}
+
 static void Axp192_ReadRegister(Axp192_RegisterType registerAddress, uint8_t* buffer)
 {
   uint8_t txData = registerAddress;

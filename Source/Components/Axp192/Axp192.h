@@ -66,6 +66,7 @@ typedef enum
   Axp192_BatteryDischargeCoulombMeterDataRegister21to16 = 0xB5,
   Axp192_BatteryDischargeCoulombMeterDataRegister15to08 = 0xB6,
   Axp192_BatteryDischargeCoulombMeterDataRegister07to00 = 0xB7,
+  Axp192_CoulombControlRegister = 0xB8,
 } Axp192_RegisterType;
 
 typedef enum
@@ -140,4 +141,5 @@ extern void Axp192_SetPwronWakeupFunctionState(Axp192_StateType state);
 extern void Axp192_Shutdown();
 extern void Axp192_SetTimer(uint8_t minutes);
 extern void Axp192_SetAdcState(Axp192_AdcType adc, Axp192_StateType state);
+extern void Axp192_SetCoulombSwitchControlState(Axp192_StateType state);
 #endif /* AXP192_AXP192_H_ */
