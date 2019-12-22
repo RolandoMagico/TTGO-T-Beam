@@ -64,6 +64,8 @@ static void Axp192_WriteI2cData(uint8_t*, size_t);
 static void Axp192_ReadRegister(Axp192_RegisterType, uint8_t*);
 static void Axp192_WriteRegister(Axp192_RegisterType, uint8_t);
 static void Axp192_UpdatePowerOutputControlRegister(Axp192_StateType, uint8_t);
+static uint16_t Axp192_GetCurrentValue(Axp192_RegisterType highRegister, Axp192_RegisterType lowRegister);
+static uint32_t Axp192_GetColumbMeterData(Axp192_RegisterType bit31To24Register, Axp192_RegisterType bit23To16Register, Axp192_RegisterType bit15To08Register, Axp192_RegisterType bit07To00Register);
 /***************************************************************************************************
  * CONSTANTS
  **************************************************************************************************/
@@ -214,14 +216,69 @@ void Axp192_SetExtenState(Axp192_StateType state)
 
 uint16_t Axp192_GetBatteryVoltage()
 {
+  uint16_t result;
   uint8_t batteryVoltageLow;
   uint8_t batteryVoltageHigh;
 
   Axp192_ReadRegister(BatteryVoltageLow4Bit, &batteryVoltageLow);
   Axp192_ReadRegister(BatteryVoltageHigh8Bit, &batteryVoltageHigh);
 
-  return (((uint16_t)batteryVoltageHigh) << 4) | (batteryVoltageLow & 0x0F);
+  result = (((uint16_t)batteryVoltageHigh) << 4) | (batteryVoltageLow & 0x0F);
 
+  /* Calculate physical value based on a resolution of 1.1mV per digit */
+  result *= 11;
+  result /= 10;
+  return result;
+}
+
+uint16_t Axp192_GetBatteryChargeCurrent()
+{
+  return Axp192_GetCurrentValue(BatteryChargeCurrentHigh8Bit, BatteryChargeCurrentLow5Bit);
+}
+
+uint16_t Axp192_GetBatteryDischargeCurrent()
+{
+  return Axp192_GetCurrentValue(BatteryDischargeCurrentHigh8Bit, BatteryDischargeCurrentLow5Bit);
+}
+
+uint32_t Axp192_GetBatteryCharge()
+{
+  uint32_t chargeColumbMeterData = Axp192_GetColumbMeterData(
+      BatteryChargingCoulombMeterDataRegister31to24,
+      BatteryChargingCoulombMeterDataRegister21to16,
+      BatteryChargingCoulombMeterDataRegister15to08,
+      BatteryChargingCoulombMeterDataRegister07to00);
+  uint32_t dischargeColumbMeterData = Axp192_GetColumbMeterData(
+      BatteryDischargeCoulombMeterDataRegister31to24,
+      BatteryDischargeCoulombMeterDataRegister21to16,
+      BatteryDischargeCoulombMeterDataRegister15to08,
+      BatteryDischargeCoulombMeterDataRegister07to00);
+
+  return 65536 / 2 * (chargeColumbMeterData - dischargeColumbMeterData) / 3600 / Axp192_GetAdcSamplingRate();
+}
+
+extern Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate()
+{
+  uint8_t registerValue;
+  Axp192_AdcSamplingRateType returnValue;
+  Axp192_ReadRegister(AdcSampleRateRegisterAndTsPinControlRegister, &registerValue);
+  switch ((registerValue >> 6) & 0x03)
+  {
+    case 0:
+      returnValue = Axp192_AdcSampelRate25Hz;
+      break;
+    case 1:
+      returnValue = Axp192_AdcSampelRate50Hz;
+      break;
+    case 2:
+      returnValue = Axp192_AdcSampelRate100Hz;
+      break;
+    case 3:
+      returnValue = Axp192_AdcSampelRate200Hz;
+      break;
+  }
+
+  return returnValue;
 }
 
 static void Axp192_ReadRegister(Axp192_RegisterType registerAddress, uint8_t* buffer)
@@ -273,4 +330,31 @@ static void Axp192_UpdatePowerOutputControlRegister(Axp192_StateType state, uint
   }
 
   Axp192_WriteRegister(Dcdc1_3AndLDO2_3SwitchControlRegister, registerValue);
+}
+
+static uint16_t Axp192_GetCurrentValue(Axp192_RegisterType highRegister, Axp192_RegisterType lowRegister)
+{
+  uint16_t result;
+  uint8_t highRegisterValue;
+  uint8_t lowRegisterValue;
+  Axp192_ReadRegister(highRegister, &highRegisterValue);
+  Axp192_ReadRegister(lowRegister, &lowRegisterValue);
+  /* Use only the lowest 5 bits */
+  result = lowRegisterValue & 0x1F;
+  result |= (((uint16_t)highRegisterValue) << 5);
+
+  /* Calculate physical value based on a resolution of 0.5mA per digit */
+  result /= 2;
+  return result;
+}
+
+static uint32_t Axp192_GetColumbMeterData(Axp192_RegisterType bit31To24Register, Axp192_RegisterType bit23To16Register, Axp192_RegisterType bit15To08Register, Axp192_RegisterType bit07To00Register)
+{
+  uint8_t byte0, byte1, byte2, byte3;
+  Axp192_ReadRegister(bit31To24Register, &byte0);
+  Axp192_ReadRegister(bit23To16Register, &byte1);
+  Axp192_ReadRegister(bit15To08Register, &byte2);
+  Axp192_ReadRegister(bit07To00Register, &byte3);
+
+  return ((((uint32_t)byte0) << 24) | (((uint32_t)byte1) << 16) | (((uint32_t)byte2) << 8) | byte3);
 }

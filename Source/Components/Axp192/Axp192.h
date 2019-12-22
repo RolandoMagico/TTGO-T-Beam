@@ -47,6 +47,19 @@ typedef enum
   LDO2_3_OutputVoltageSettingRegister = 0x28,
   BatteryVoltageHigh8Bit = 0x78,
   BatteryVoltageLow4Bit,
+  BatteryChargeCurrentHigh8Bit = 0x7A,
+  BatteryChargeCurrentLow5Bit,
+  BatteryDischargeCurrentHigh8Bit = 0x7C,
+  BatteryDischargeCurrentLow5Bit,
+  AdcSampleRateRegisterAndTsPinControlRegister = 0x84,
+  BatteryChargingCoulombMeterDataRegister31to24 = 0xB0,
+  BatteryChargingCoulombMeterDataRegister21to16 = 0xB1,
+  BatteryChargingCoulombMeterDataRegister15to08 = 0xB2,
+  BatteryChargingCoulombMeterDataRegister07to00 = 0xB3,
+  BatteryDischargeCoulombMeterDataRegister31to24 = 0xB4,
+  BatteryDischargeCoulombMeterDataRegister21to16 = 0xB5,
+  BatteryDischargeCoulombMeterDataRegister15to08 = 0xB6,
+  BatteryDischargeCoulombMeterDataRegister07to00 = 0xB7,
 } Axp192_RegisterType;
 
 typedef enum
@@ -54,6 +67,14 @@ typedef enum
   Axp192_Off = 0,
   Axp192_On = 1,
 } Axp192_StateType;
+
+typedef enum
+{
+  Axp192_AdcSampelRate25Hz = 25,
+  Axp192_AdcSampelRate50Hz = 50,
+  Axp192_AdcSampelRate100Hz = 100,
+  Axp192_AdcSampelRate200Hz = 200,
+} Axp192_AdcSamplingRateType;
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
@@ -70,6 +91,10 @@ extern uint16_t Axp192_GetLdo3Voltage();
 extern void Axp192_SetLdo3Voltage(uint16_t voltage);
 extern void Axp192_SetExtenState(Axp192_StateType state);
 extern uint16_t Axp192_GetBatteryVoltage();
+extern uint16_t Axp192_GetBatteryChargeCurrent();
+extern uint16_t Axp192_GetBatteryDischargeCurrent();
+extern uint32_t Axp192_GetBatteryCharge();
+extern Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate();
 
 
 #endif /* AXP192_AXP192_H_ */
