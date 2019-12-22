@@ -147,7 +147,7 @@ static void Task100ms(void *pvParameters)
   size_t gpsDataLength = 0;
   uint8_t receiveBuffer[1024];
 
-  Display_DrawString(0, 15, "Task100ms");
+
 
   for (;;)
   {
@@ -175,7 +175,11 @@ static void Task1000ms(void *pvParameters)
   TickType_t xLastWakeTime = xTaskGetTickCount();
   UBaseType_t remainingTaskStack = INT32_MAX;
   uint16_t lastBatteryVoltage = UINT16_MAX;
+  uint16_t lastChargeCurrent = UINT16_MAX;
+  uint16_t lastDischargeCurrent = UINT16_MAX;
+  uint32_t lastBatteryCharge = UINT32_MAX;
   uint16_t Task1000ms_SecondCounter = 0;
+  char stringBuffer[20];
   for (;;)
   {
     // Wait for the next cycle.
@@ -184,12 +188,30 @@ static void Task1000ms(void *pvParameters)
     remainingTaskStack = TaskStackMonitoring(remainingTaskStack);
 
     uint16_t currentBatteryVoltage = Axp192_GetBatteryVoltage();
-    if (currentBatteryVoltage != lastBatteryVoltage)
+    uint16_t currentChargeCurrent = Axp192_GetBatteryChargeCurrent();
+    uint16_t currentDisChargeCurrent = Axp192_GetBatteryDischargeCurrent();
+    uint32_t currentBatteryCharge = Axp192_GetBatteryCharge();
+    if ((currentBatteryVoltage != lastBatteryVoltage) ||
+        (currentChargeCurrent != lastChargeCurrent) ||
+        (currentDisChargeCurrent != lastDischargeCurrent) ||
+        (currentBatteryCharge != lastBatteryCharge))
     {
-      printf("Battery Voltage: %d mV\n", currentBatteryVoltage);
+      Display_Clear();
+      snprintf(stringBuffer, sizeof(stringBuffer), "Ubat: %4d mV", currentBatteryVoltage);
+      Display_DrawString(0, 15, stringBuffer);
+      snprintf(stringBuffer, sizeof(stringBuffer), "Icharge: %4d mA", currentChargeCurrent);
+      Display_DrawString(0, 30, stringBuffer);
+      snprintf(stringBuffer, sizeof(stringBuffer), "Ibat: %4d mA", currentDisChargeCurrent);
+      Display_DrawString(0, 45, stringBuffer);
+      snprintf(stringBuffer, sizeof(stringBuffer), "Cbat: %8d mAh", currentBatteryCharge);
+      Display_DrawString(0, 60, stringBuffer);
     }
 
     lastBatteryVoltage = currentBatteryVoltage;
+    lastChargeCurrent = currentChargeCurrent;
+    lastDischargeCurrent = currentDisChargeCurrent;
+    lastBatteryCharge = currentBatteryCharge;
+
     if ((Task1000ms_SecondCounter % 1000) == 0)
     {
       ESP_LOGI(__FUNCTION__, "Sending TTN data");
