@@ -336,30 +336,49 @@ void Axp192_SetAdcState(Axp192_AdcType adc, Axp192_StateType state)
 {
   switch (adc)
   {
+    /* ADC Enable Setting Register 1 */
     case Axp192_BatteryVoltageAdc:
-      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 7, state);
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister1, 7, state);
       break;
     case Axp192_BatteryCurrentAdc:
-      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 6, state);
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister1, 6, state);
       break;
     case Axp192_AcInVoltageAdc:
-      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 5, state);
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister1, 5, state);
       break;
     case Axp192_AcInCurrentAdc:
-      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 4, state);
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister1, 4, state);
       break;
     case Axp192_VbusVoltageAdc:
-      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 3, state);
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister1, 3, state);
       break;
     case Axp192_VbusCurrentAdc:
-      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 2, state);
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister1, 2, state);
       break;
     case Axp192_ApsVoltageAdc:
-      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 1, state);
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister1, 1, state);
       break;
     case Axp192_TsPinAdc:
-      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 0, state);
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister1, 0, state);
       break;
+
+    /* ADC Enable Setting Register 2 */
+    case Axp192_InternalTemperatureMonitoringAdc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister2, 7, state);
+      break;
+    case Axp192_Gpio0Adc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister2, 3, state);
+      break;
+    case Axp192_Gpio1Adc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister2, 2, state);
+      break;
+    case Axp192_Gpio2Adc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister2, 1, state);
+      break;
+    case Axp192_Gpio3Adc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister2, 0, state);
+      break;
+
     default:
       ESP_LOGE(__FUNCTION__, "Value of parameter \"adc\" out of range");
       break;

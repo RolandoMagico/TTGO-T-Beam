@@ -54,7 +54,8 @@ typedef enum
   Axp192_BatteryChargeCurrentLow5Bit,
   Axp192_BatteryDischargeCurrentHigh8Bit = 0x7C,
   Axp192_BatteryDischargeCurrentLow5Bit,
-  Axp192_AdcEnableSettingRegister = 0x82,
+  Axp192_AdcEnableSettingRegister1 = 0x82,
+  Axp192_AdcEnableSettingRegister2 = 0x83,
   Axp192_AdcSampleRateRegisterAndTsPinControlRegister = 0x84,
   Axp192_TimerControlRegister = 0x8A,
   Axp192_BatteryChargingCoulombMeterDataRegister31to24 = 0xB0,
@@ -105,6 +106,11 @@ typedef enum
   Axp192_VbusCurrentAdc,
   Axp192_ApsVoltageAdc,
   Axp192_TsPinAdc,
+  Axp192_InternalTemperatureMonitoringAdc,
+  Axp192_Gpio0Adc,
+  Axp192_Gpio1Adc,
+  Axp192_Gpio2Adc,
+  Axp192_Gpio3Adc,
 } Axp192_AdcType;
 /***************************************************************************************************
  * DECLARATIONS
