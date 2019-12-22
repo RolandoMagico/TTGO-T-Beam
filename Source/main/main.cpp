@@ -147,6 +147,8 @@ static void Task100ms(void *pvParameters)
   size_t gpsDataLength = 0;
   uint8_t receiveBuffer[1024];
 
+  Display_DrawString(0, 15, "Task100ms");
+
   for (;;)
   {
     // Wait for the next cycle.

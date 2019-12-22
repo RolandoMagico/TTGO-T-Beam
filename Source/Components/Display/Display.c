@@ -51,7 +51,7 @@ static uint8_t Display_GpioAndDelayCallback(u8x8_t *u8x8, uint8_t msg, uint8_t a
  **************************************************************************************************/
 static uint8_t Display_TxData[32];
 static uint8_t Display_TxDataLength;
-
+static u8g2_t Dispaly_u8g2_Instance;
 /***************************************************************************************************
  * IMPLEMENTATION
  **************************************************************************************************/
@@ -62,12 +62,25 @@ void Display_InitMemory()
 
 void Display_Init()
 {
-  u8g2_t u8g2;
-  u8g2_Setup_sh1106_i2c_128x64_noname_1(&u8g2, U8G2_R0, &Display_CommunicationCallback, &Display_GpioAndDelayCallback);
-  u8g2_InitDisplay(&u8g2); // send init sequence to the display, display is in sleep mode after this,
-  u8g2_SetPowerSave(&u8g2, 0); // wake up display
-  u8g2_SetI2CAddress(&u8g2, DISPLAY_I2C_PORT);
-  u8g2_ClearDisplay(&u8g2);
+  u8g2_Setup_sh1106_i2c_128x64_noname_f(&Dispaly_u8g2_Instance, U8G2_R0, &Display_CommunicationCallback, &Display_GpioAndDelayCallback);
+
+  /* Send initialization sequence to the display, display is in sleep mode afterwards */
+  u8g2_InitDisplay(&Dispaly_u8g2_Instance);
+
+  /* Wake up display */
+  u8g2_SetPowerSave(&Dispaly_u8g2_Instance, 0);
+
+  /* TODO: Currently the I2C address is only set but not used anywhere */
+  u8g2_SetI2CAddress(&Dispaly_u8g2_Instance, DISPLAY_I2C_PORT);
+
+  u8g2_ClearDisplay(&Dispaly_u8g2_Instance);
+  u8g2_SetFont(&Dispaly_u8g2_Instance, u8g2_font_ncenB10_tr);
+}
+
+void Display_DrawString(uint8_t x, uint8_t y, const char *str)
+{
+  u8g2_DrawStr(&Dispaly_u8g2_Instance, x, y, str);
+  u8g2_SendBuffer(&Dispaly_u8g2_Instance);
 }
 
 static uint8_t Display_GpioAndDelayCallback(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
