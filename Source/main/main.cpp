@@ -80,6 +80,14 @@ extern "C" void app_main()
   Axp192_SetLdo3Voltage(3300);
   Axp192_SetLdo3State(Axp192_On);
 
+  Axp192_SetPwronWakeupFunctionState(Axp192_On);
+
+  /* Required for Axp192_GetBatteryDischargeCurrent */
+  Axp192_SetAdcState(Axp192_BatteryCurrentAdc, Axp192_On);
+
+  /* Reuired for Axp192_GetBatteryCharge */
+  Axp192_SetCoulombSwitchControlState(Axp192_On);
+
   if ((xTaskCreatePinnedToCore(Task100ms, "Task100ms", 4096, NULL, 10, NULL, 0) == pdPASS) &&
       (xTaskCreatePinnedToCore(Task1000ms, "Task1000ms", 4096, NULL, 10, NULL, 0) == pdPASS))
   {
@@ -203,14 +211,23 @@ static void Task1000ms(void *pvParameters)
       Display_DrawString(0, 30, stringBuffer);
       snprintf(stringBuffer, sizeof(stringBuffer), "Ibat: %4d mA", currentDisChargeCurrent);
       Display_DrawString(0, 45, stringBuffer);
-      snprintf(stringBuffer, sizeof(stringBuffer), "Cbat: %8d mAh", currentBatteryCharge);
+      snprintf(stringBuffer, sizeof(stringBuffer), "Cbat: %5d mAh", currentBatteryCharge);
       Display_DrawString(0, 60, stringBuffer);
+      Display_SendBuffer();
     }
 
     lastBatteryVoltage = currentBatteryVoltage;
     lastChargeCurrent = currentChargeCurrent;
     lastDischargeCurrent = currentDisChargeCurrent;
     lastBatteryCharge = currentBatteryCharge;
+
+    if ((Task1000ms_SecondCounter % 60) == 0)
+    {
+      /* Uncomment the following block to shutdown
+      ESP_LOGI(__FUNCTION__, "Shutdown");
+      Axp192_SetTimer(1);
+      Axp192_Shutdown(); */
+    }
 
     if ((Task1000ms_SecondCounter % 1000) == 0)
     {
