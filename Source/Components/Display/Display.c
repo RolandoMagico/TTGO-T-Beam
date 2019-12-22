@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **************************************************************************************************/
-
+/***************************************************************************************************
+ * Decsription
+ * Implementation for a Adafruit OLED display wit a resolution of 128x64 pxiels.
+ **************************************************************************************************/
 /***************************************************************************************************
  * INCLUDES
  **************************************************************************************************/
@@ -73,8 +76,13 @@ void Display_Init()
   /* TODO: Currently the I2C address is only set but not used anywhere */
   u8g2_SetI2CAddress(&Dispaly_u8g2_Instance, DISPLAY_I2C_PORT);
 
-  u8g2_ClearDisplay(&Dispaly_u8g2_Instance);
+  Display_Clear();
   u8g2_SetFont(&Dispaly_u8g2_Instance, u8g2_font_ncenB10_tr);
+}
+
+void Display_Clear()
+{
+  u8g2_ClearDisplay(&Dispaly_u8g2_Instance);
 }
 
 void Display_DrawString(uint8_t x, uint8_t y, const char *str)

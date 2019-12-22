@@ -33,6 +33,7 @@
  **************************************************************************************************/
 extern void Display_InitMemory();
 extern void Display_Init();
+extern void Display_Clear();
 extern void Display_DrawString(uint8_t x, uint8_t y, const char *str);
 
 #endif /* COMPONENTS_DISPLAY_DISPLAY_H_ */
