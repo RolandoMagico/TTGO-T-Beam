@@ -332,6 +332,40 @@ void Axp192_SetTimer(uint8_t minutes)
   }
 }
 
+void Axp192_SetAdcState(Axp192_AdcType adc, Axp192_StateType state)
+{
+  switch (adc)
+  {
+    case Axp192_BatteryVoltageAdc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 7, state);
+      break;
+    case Axp192_BatteryCurrentAdc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 6, state);
+      break;
+    case Axp192_AcInVoltageAdc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 5, state);
+      break;
+    case Axp192_AcInCurrentAdc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 4, state);
+      break;
+    case Axp192_VbusVoltageAdc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 3, state);
+      break;
+    case Axp192_VbusCurrentAdc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 2, state);
+      break;
+    case Axp192_ApsVoltageAdc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 1, state);
+      break;
+    case Axp192_TsPinAdc:
+      Axp192_WriteRegister1Bit(Axp192_AdcEnableSettingRegister, 0, state);
+      break;
+    default:
+      ESP_LOGE(__FUNCTION__, "Value of parameter \"adc\" out of range");
+      break;
+  }
+}
+
 static void Axp192_ReadRegister(Axp192_RegisterType registerAddress, uint8_t* buffer)
 {
   uint8_t txData = registerAddress;

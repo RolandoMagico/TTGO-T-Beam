@@ -54,6 +54,7 @@ typedef enum
   Axp192_BatteryChargeCurrentLow5Bit,
   Axp192_BatteryDischargeCurrentHigh8Bit = 0x7C,
   Axp192_BatteryDischargeCurrentLow5Bit,
+  Axp192_AdcEnableSettingRegister = 0x82,
   Axp192_AdcSampleRateRegisterAndTsPinControlRegister = 0x84,
   Axp192_TimerControlRegister = 0x8A,
   Axp192_BatteryChargingCoulombMeterDataRegister31to24 = 0xB0,
@@ -93,6 +94,18 @@ typedef enum
   Axp192_PowerModeA = 0,
   Axp192_PowerModeB = 1,
 } Axp192_PowerModeType;
+
+typedef enum
+{
+  Axp192_BatteryVoltageAdc,
+  Axp192_BatteryCurrentAdc,
+  Axp192_AcInVoltageAdc,
+  Axp192_AcInCurrentAdc,
+  Axp192_VbusVoltageAdc,
+  Axp192_VbusCurrentAdc,
+  Axp192_ApsVoltageAdc,
+  Axp192_TsPinAdc,
+} Axp192_AdcType;
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
@@ -120,4 +133,5 @@ extern Axp192_StateType Axp192_GetPwronWakeupFunctionState();
 extern void Axp192_SetPwronWakeupFunctionState(Axp192_StateType state);
 extern void Axp192_Shutdown();
 extern void Axp192_SetTimer(uint8_t minutes);
+extern void Axp192_SetAdcState(Axp192_AdcType adc, Axp192_StateType state);
 #endif /* AXP192_AXP192_H_ */
