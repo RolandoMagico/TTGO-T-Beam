@@ -88,6 +88,10 @@ void Display_Clear()
 void Display_DrawString(uint8_t x, uint8_t y, const char *str)
 {
   u8g2_DrawStr(&Dispaly_u8g2_Instance, x, y, str);
+}
+
+void Display_SendBuffer()
+{
   u8g2_SendBuffer(&Dispaly_u8g2_Instance);
 }
 
