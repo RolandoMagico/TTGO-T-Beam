@@ -102,7 +102,7 @@ void Axp192_SetDcDc1Voltage(uint16_t voltage)
   {
     /* Calculate register value based on a resolution of 25mV per bit and 0.7V offset */
     voltage = (voltage - 700) / 25;
-    Axp192_WriteRegister(Dcdc1VoltageSettingRegister, (uint8_t)voltage);
+    Axp192_WriteRegister(Axp192_Dcdc1VoltageSettingRegister, (uint8_t)voltage);
   }
 }
 
@@ -125,7 +125,7 @@ void Axp192_SetDcDc2Voltage(uint16_t voltage)
   {
     /* Calculate register value based on a resolution of 25mV per bit and 0.7V offset */
     voltage = (voltage - 700) / 25;
-    Axp192_WriteRegister(Dcdc2VoltageSettingRegister, (uint8_t)voltage);
+    Axp192_WriteRegister(Axp192_Dcdc2VoltageSettingRegister, (uint8_t)voltage);
   }
 }
 
@@ -148,7 +148,7 @@ void Axp192_SetLdo2Voltage(uint16_t voltage)
   {
     uint8_t registerValue;
 
-    Axp192_ReadRegister(LDO2_3_OutputVoltageSettingRegister, &registerValue);
+    Axp192_ReadRegister(Axp192_LDO2_3_OutputVoltageSettingRegister, &registerValue);
 
     /* Calculate register value based on a resolution of 100mV per bit and 1.8V offset */
     voltage = (voltage - 1800) / 100;
@@ -159,7 +159,7 @@ void Axp192_SetLdo2Voltage(uint16_t voltage)
 
     /* Set new voltage value */
     registerValue |= voltage;
-    Axp192_WriteRegister(LDO2_3_OutputVoltageSettingRegister, registerValue);
+    Axp192_WriteRegister(Axp192_LDO2_3_OutputVoltageSettingRegister, registerValue);
   }
 }
 
@@ -172,7 +172,7 @@ uint16_t Axp192_GetLdo3Voltage()
 {
     uint8_t registerValue;
     uint16_t voltage;
-    Axp192_ReadRegister(LDO2_3_OutputVoltageSettingRegister, &registerValue);
+    Axp192_ReadRegister(Axp192_LDO2_3_OutputVoltageSettingRegister, &registerValue);
 
     voltage = registerValue & 0x0F;
     voltage = AXP_192_LDO2_OFFSET + (AXP_192_LDO2_FACTOR * voltage);
@@ -194,7 +194,7 @@ void Axp192_SetLdo3Voltage(uint16_t voltage)
   {
     uint8_t registerValue;
 
-    Axp192_ReadRegister(LDO2_3_OutputVoltageSettingRegister, &registerValue);
+    Axp192_ReadRegister(Axp192_LDO2_3_OutputVoltageSettingRegister, &registerValue);
 
     /* Calculate register value based on a resolution of 100mV per bit and 1.8V offset */
     voltage = (voltage - AXP_192_LDO2_OFFSET) / AXP_192_LDO2_FACTOR;
@@ -205,7 +205,7 @@ void Axp192_SetLdo3Voltage(uint16_t voltage)
 
     /* Set new voltage value */
     registerValue |= voltage;
-    Axp192_WriteRegister(LDO2_3_OutputVoltageSettingRegister, registerValue);
+    Axp192_WriteRegister(Axp192_LDO2_3_OutputVoltageSettingRegister, registerValue);
   }
 }
 
@@ -220,8 +220,8 @@ uint16_t Axp192_GetBatteryVoltage()
   uint8_t batteryVoltageLow;
   uint8_t batteryVoltageHigh;
 
-  Axp192_ReadRegister(BatteryVoltageLow4Bit, &batteryVoltageLow);
-  Axp192_ReadRegister(BatteryVoltageHigh8Bit, &batteryVoltageHigh);
+  Axp192_ReadRegister(Axp192_BatteryVoltageLow4Bit, &batteryVoltageLow);
+  Axp192_ReadRegister(Axp192_BatteryVoltageHigh8Bit, &batteryVoltageHigh);
 
   result = (((uint16_t)batteryVoltageHigh) << 4) | (batteryVoltageLow & 0x0F);
 
@@ -233,26 +233,26 @@ uint16_t Axp192_GetBatteryVoltage()
 
 uint16_t Axp192_GetBatteryChargeCurrent()
 {
-  return Axp192_GetCurrentValue(BatteryChargeCurrentHigh8Bit, BatteryChargeCurrentLow5Bit);
+  return Axp192_GetCurrentValue(Axp192_BatteryChargeCurrentHigh8Bit, Axp192_BatteryChargeCurrentLow5Bit);
 }
 
 uint16_t Axp192_GetBatteryDischargeCurrent()
 {
-  return Axp192_GetCurrentValue(BatteryDischargeCurrentHigh8Bit, BatteryDischargeCurrentLow5Bit);
+  return Axp192_GetCurrentValue(Axp192_BatteryDischargeCurrentHigh8Bit, Axp192_BatteryDischargeCurrentLow5Bit);
 }
 
 uint32_t Axp192_GetBatteryCharge()
 {
   uint32_t chargeColumbMeterData = Axp192_GetColumbMeterData(
-      BatteryChargingCoulombMeterDataRegister31to24,
-      BatteryChargingCoulombMeterDataRegister21to16,
-      BatteryChargingCoulombMeterDataRegister15to08,
-      BatteryChargingCoulombMeterDataRegister07to00);
+      Axp192_BatteryChargingCoulombMeterDataRegister31to24,
+      Axp192_BatteryChargingCoulombMeterDataRegister21to16,
+      Axp192_BatteryChargingCoulombMeterDataRegister15to08,
+      Axp192_BatteryChargingCoulombMeterDataRegister07to00);
   uint32_t dischargeColumbMeterData = Axp192_GetColumbMeterData(
-      BatteryDischargeCoulombMeterDataRegister31to24,
-      BatteryDischargeCoulombMeterDataRegister21to16,
-      BatteryDischargeCoulombMeterDataRegister15to08,
-      BatteryDischargeCoulombMeterDataRegister07to00);
+      Axp192_BatteryDischargeCoulombMeterDataRegister31to24,
+      Axp192_BatteryDischargeCoulombMeterDataRegister21to16,
+      Axp192_BatteryDischargeCoulombMeterDataRegister15to08,
+      Axp192_BatteryDischargeCoulombMeterDataRegister07to00);
 
   return 65536 / 2 * (chargeColumbMeterData - dischargeColumbMeterData) / 3600 / Axp192_GetAdcSamplingRate();
 }
@@ -261,7 +261,7 @@ extern Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate()
 {
   uint8_t registerValue;
   Axp192_AdcSamplingRateType returnValue;
-  Axp192_ReadRegister(AdcSampleRateRegisterAndTsPinControlRegister, &registerValue);
+  Axp192_ReadRegister(Axp192_AdcSampleRateRegisterAndTsPinControlRegister, &registerValue);
   switch ((registerValue >> 6) & 0x03)
   {
     case 0:
@@ -284,14 +284,14 @@ extern Axp192_AdcSamplingRateType Axp192_GetAdcSamplingRate()
 Axp192_StateType Axp192_GetChargeFunctionState()
 {
   uint8_t registerValue;
-  Axp192_ReadRegister(ChargeControlRegister1, &registerValue);
+  Axp192_ReadRegister(Axp192_ChargeControlRegister1, &registerValue);
   return (Axp192_StateType)((registerValue >> 7) & 0x01);
 }
 
 Axp192_ChargeTargetVoltageType Axp192_GetChargeTargetVoltage()
 {
   uint8_t registerValue;
-  Axp192_ReadRegister(ChargeControlRegister1, &registerValue);
+  Axp192_ReadRegister(Axp192_ChargeControlRegister1, &registerValue);
   return (Axp192_StateType)((registerValue >> 5) & 0x03);
 }
 
@@ -333,7 +333,7 @@ static void Axp192_WriteI2cData(uint8_t* data, size_t dataLength)
 static void Axp192_UpdatePowerOutputControlRegister(Axp192_StateType state, uint8_t bit)
 {
   uint8_t registerValue;
-  Axp192_ReadRegister(Dcdc1_3AndLDO2_3SwitchControlRegister, &registerValue);
+  Axp192_ReadRegister(Axp192_Dcdc1_3AndLDO2_3SwitchControlRegister, &registerValue);
   if (state == Axp192_Off)
   {
     registerValue &= ~ bit;
@@ -343,7 +343,7 @@ static void Axp192_UpdatePowerOutputControlRegister(Axp192_StateType state, uint
     registerValue |= bit;
   }
 
-  Axp192_WriteRegister(Dcdc1_3AndLDO2_3SwitchControlRegister, registerValue);
+  Axp192_WriteRegister(Axp192_Dcdc1_3AndLDO2_3SwitchControlRegister, registerValue);
 }
 
 static uint16_t Axp192_GetCurrentValue(Axp192_RegisterType highRegister, Axp192_RegisterType lowRegister)
