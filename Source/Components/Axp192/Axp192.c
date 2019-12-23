@@ -385,6 +385,135 @@ void Axp192_SetAdcState(Axp192_AdcType adc, Axp192_StateType state)
   }
 }
 
+Axp192_StateType Axp192_GetIrqState(Axp192_IrqType irq)
+{
+  Axp192_StateType returnValue = Axp192_Off;
+  switch (irq)
+  {
+    /* IRQ Enable Control Register 1 */
+    case Axp192_AcInOverVoltageIrq:
+    case Axp192_AcInAccessIrq:
+    case Axp192_AcInRemovedIrq:
+    case Axp192_VbusOverVoltageIrq:
+    case Axp192_VbusAccessIrq:
+    case Axp192_VbusRemovedIrq:
+    case Axp192_VbusAvailableButLessThanVholdIrq:
+      returnValue = Axp192_ReadRegister1Bit(Axp192_IrqStatusRegister1, irq % 8);
+      break;
+
+      /* IRQ Enable Control Register 2 */
+    case Axp192_BatteryConnectedIrq:
+    case Axp192_BatteryRemovedIrq:
+    case Axp192_BatteryActivationModeIrq:
+    case Axp192_ExitBatteryActivationModeIrq:
+    case Axp192_ChargingIrq:
+    case Axp192_FinishedChargingIrq:
+    case Axp192_BatteryOverTemperatureIrq:
+    case Axp192_BatteryLowTemperatureIrq:
+      returnValue = Axp192_ReadRegister1Bit(Axp192_IrqStatusRegister2, irq % 8);
+      break;
+
+    /* IRQ Enable Control Register 3 */
+    case Axp192_InternalOverTemperatureIrq:
+    case Axp192_ChargingCurrentLessThanSetCurrentIrq:
+    case Axp192_DcDc1OutputVoltageLessThanSetVoltageIrq:
+    case Axp192_DcDc2OutputVoltageLessThanSetVoltageIrq:
+    case Axp192_DcDc3OutputVoltageLessThanSetVoltageIrq:
+    case Axp192_ShortButtonIrq:
+    case Axp192_LongButtonIrq:
+      returnValue = Axp192_ReadRegister1Bit(Axp192_IrqStatusRegister3, irq % 8);
+      break;
+
+    /* IRQ Enable Control Register 4 */
+    case Axp192_N_OE_BootIrq:
+    case Axp192_N_OE_ShutdownIrq:
+    case Axp192_VbusValidIrq:
+    case Axp192_VbusInvalidIrq:
+    case Axp192_VbusSessionABIrq:
+    case Axp192_VbusSessionEndIrq:
+    case Axp192_LowPressureIrq:
+      returnValue = Axp192_ReadRegister1Bit(Axp192_IrqStatusRegister4, irq % 8);
+      break;
+
+    /* IRQ Enable Control Register 5 */
+    case Axp192_Gpio0InputEdgeTriggerIrq:
+    case Axp192_Gpio1InputEdgeTriggerIrq:
+    case Axp192_Gpio2InputEdgeTriggerIrq:
+    case Axp192_TimerExpiredIrq:
+      returnValue = Axp192_ReadRegister1Bit(Axp192_IrqStatusRegister5, irq % 8);
+      break;
+
+    default:
+      ESP_LOGE(__FUNCTION__, "Value of parameter \"irq\" out of range");
+      break;
+  }
+
+  return returnValue;
+}
+
+void Axp192_SetIrqState(Axp192_IrqType irq, Axp192_StateType state)
+{
+  switch (irq)
+  {
+    /* IRQ Enable Control Register 1 */
+    case Axp192_AcInOverVoltageIrq:
+    case Axp192_AcInAccessIrq:
+    case Axp192_AcInRemovedIrq:
+    case Axp192_VbusOverVoltageIrq:
+    case Axp192_VbusAccessIrq:
+    case Axp192_VbusRemovedIrq:
+    case Axp192_VbusAvailableButLessThanVholdIrq:
+      Axp192_WriteRegister1Bit(Axp192_IrqEnableControlRegister1, irq % 8, state);
+      break;
+
+      /* IRQ Enable Control Register 2 */
+    case Axp192_BatteryConnectedIrq:
+    case Axp192_BatteryRemovedIrq:
+    case Axp192_BatteryActivationModeIrq:
+    case Axp192_ExitBatteryActivationModeIrq:
+    case Axp192_ChargingIrq:
+    case Axp192_FinishedChargingIrq:
+    case Axp192_BatteryOverTemperatureIrq:
+    case Axp192_BatteryLowTemperatureIrq:
+      Axp192_WriteRegister1Bit(Axp192_IrqEnableControlRegister2, irq % 8, state);
+      break;
+
+    /* IRQ Enable Control Register 3 */
+    case Axp192_InternalOverTemperatureIrq:
+    case Axp192_ChargingCurrentLessThanSetCurrentIrq:
+    case Axp192_DcDc1OutputVoltageLessThanSetVoltageIrq:
+    case Axp192_DcDc2OutputVoltageLessThanSetVoltageIrq:
+    case Axp192_DcDc3OutputVoltageLessThanSetVoltageIrq:
+    case Axp192_ShortButtonIrq:
+    case Axp192_LongButtonIrq:
+      Axp192_WriteRegister1Bit(Axp192_IrqEnableControlRegister3, irq % 8, state);
+      break;
+
+    /* IRQ Enable Control Register 4 */
+    case Axp192_N_OE_BootIrq:
+    case Axp192_N_OE_ShutdownIrq:
+    case Axp192_VbusValidIrq:
+    case Axp192_VbusInvalidIrq:
+    case Axp192_VbusSessionABIrq:
+    case Axp192_VbusSessionEndIrq:
+    case Axp192_LowPressureIrq:
+      Axp192_WriteRegister1Bit(Axp192_IrqEnableControlRegister4, irq % 8, state);
+      break;
+
+    /* IRQ Enable Control Register 5 */
+    case Axp192_Gpio0InputEdgeTriggerIrq:
+    case Axp192_Gpio1InputEdgeTriggerIrq:
+    case Axp192_Gpio2InputEdgeTriggerIrq:
+    case Axp192_TimerExpiredIrq:
+      Axp192_WriteRegister1Bit(Axp192_IrqEnableControlRegister5, irq % 8, state);
+      break;
+
+    default:
+      ESP_LOGE(__FUNCTION__, "Value of parameter \"irq\" out of range");
+      break;
+  }
+}
+
 void Axp192_SetCoulombSwitchControlState(Axp192_StateType state)
 {
   Axp192_WriteRegister1Bit(Axp192_CoulombControlRegister, 7, state);

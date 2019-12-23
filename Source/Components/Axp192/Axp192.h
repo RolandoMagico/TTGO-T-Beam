@@ -48,6 +48,16 @@ typedef enum
   Axp192_VoffShutdownVoltageSettingRegister = 0x31,
   Axp192_ShutdownBatteryDetectionChargeLedControlRegister = 0x32,
   Axp192_ChargeControlRegister1 = 0x33,
+  Axp192_IrqEnableControlRegister1 = 0x40,
+  Axp192_IrqEnableControlRegister2 = 0x41,
+  Axp192_IrqEnableControlRegister3 = 0x42,
+  Axp192_IrqEnableControlRegister4 = 0x43,
+  Axp192_IrqEnableControlRegister5 = 0x4A,
+  Axp192_IrqStatusRegister1 = 0x44,
+  Axp192_IrqStatusRegister2 = 0x45,
+  Axp192_IrqStatusRegister3 = 0x46,
+  Axp192_IrqStatusRegister4 = 0x47,
+  Axp192_IrqStatusRegister5 = 0x4D,
   Axp192_BatteryVoltageHigh8Bit = 0x78,
   Axp192_BatteryVoltageLow4Bit,
   Axp192_BatteryChargeCurrentHigh8Bit = 0x7A,
@@ -113,6 +123,60 @@ typedef enum
   Axp192_Gpio2Adc,
   Axp192_Gpio3Adc,
 } Axp192_AdcType;
+
+/*
+ * Enumeration of all interrupt sources.
+ * The enumeration values are chosen so that the value modulo 8 results in the bit number
+ * of the corresponding register.
+ */
+typedef enum
+{
+  /* IRQ Enable Control Register 1 */
+  /* Bit 0 is not used */
+  /* Bit 1 */ Axp192_VbusAvailableButLessThanVholdIrq = 1,
+  /* Bit 2 */ Axp192_VbusRemovedIrq = 2,
+  /* Bit 3 */ Axp192_VbusAccessIrq = 3,
+  /* Bit 4 */ Axp192_VbusOverVoltageIrq = 4,
+  /* Bit 5 */ Axp192_AcInRemovedIrq = 5,
+  /* Bit 6 */ Axp192_AcInAccessIrq = 6,
+  /* Bit 7 */ Axp192_AcInOverVoltageIrq = 7,
+
+  /* IRQ Enable Control Register 2 */
+  /* Bit 0 */ Axp192_BatteryLowTemperatureIrq = 8,
+  /* Bit 1 */ Axp192_BatteryOverTemperatureIrq = 9,
+  /* Bit 2 */ Axp192_FinishedChargingIrq = 10,
+  /* Bit 3 */ Axp192_ChargingIrq = 11,
+  /* Bit 4 */ Axp192_ExitBatteryActivationModeIrq = 12,
+  /* Bit 5 */ Axp192_BatteryActivationModeIrq = 13,
+  /* Bit 6 */ Axp192_BatteryRemovedIrq = 14,
+  /* Bit 7 */ Axp192_BatteryConnectedIrq = 15,
+
+  /* IRQ Enable Control Register 3 */
+  /* Bit 0 */ Axp192_LongButtonIrq = 16,
+  /* Bit 1 */ Axp192_ShortButtonIrq = 17,
+  /* Bit 3 */ Axp192_DcDc3OutputVoltageLessThanSetVoltageIrq = 19,
+  /* Bit 4 */ Axp192_DcDc2OutputVoltageLessThanSetVoltageIrq = 20,
+  /* Bit 5 */ Axp192_DcDc1OutputVoltageLessThanSetVoltageIrq = 21,
+  /* Bit 6 */ Axp192_ChargingCurrentLessThanSetCurrentIrq = 22,
+  /* Bit 7 */ Axp192_InternalOverTemperatureIrq = 23,
+
+  /* IRQ Enable Control Register 4 */
+  /* Bit 0 */ Axp192_LowPressureIrq = 24,
+  /* Bit 1 is not used */
+  /* Bit 2 */ Axp192_VbusSessionEndIrq = 26,
+  /* Bit 3 */ Axp192_VbusSessionABIrq = 27,
+  /* Bit 4 */ Axp192_VbusInvalidIrq = 28,
+  /* Bit 5 */ Axp192_VbusValidIrq = 29,
+  /* Bit 6 */ Axp192_N_OE_ShutdownIrq = 30,
+  /* Bit 7 */ Axp192_N_OE_BootIrq = 31,
+
+  /* IRQ Enable Control Register 5 */
+  /* Bit 0 */ Axp192_Gpio0InputEdgeTriggerIrq = 32,
+  /* Bit 1 */ Axp192_Gpio1InputEdgeTriggerIrq = 33,
+  /* Bit 2 */ Axp192_Gpio2InputEdgeTriggerIrq = 34,
+  /* Bits 3-6 are not used */
+  /* Bit 7 */ Axp192_TimerExpiredIrq = 39,
+} Axp192_IrqType;
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
@@ -142,4 +206,6 @@ extern void Axp192_Shutdown();
 extern void Axp192_SetTimer(uint8_t minutes);
 extern void Axp192_SetAdcState(Axp192_AdcType adc, Axp192_StateType state);
 extern void Axp192_SetCoulombSwitchControlState(Axp192_StateType state);
+extern Axp192_StateType Axp192_GetIrqState(Axp192_IrqType irq);
+extern void Axp192_SetIrqState(Axp192_IrqType irq, Axp192_StateType state);
 #endif /* AXP192_AXP192_H_ */
