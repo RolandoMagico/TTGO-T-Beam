@@ -64,10 +64,11 @@ static TTNProvisioning provisioning;
 static TTNLogging* logging;
 #endif
 
+RTC_DATA_ATTR static struct lmic_t TheThingsNetwork_Backup;
 static void eventCallback(void* userData, ev_t event);
 static void messageReceivedCallback(void *userData, uint8_t port, const uint8_t *message, size_t messageSize);
 static void messageTransmittedCallback(void *userData, int success);
-
+static void TheThingsNetwork_CopyLmicData(struct lmic_t* source, struct lmic_t* destination);
 
 TheThingsNetwork::TheThingsNetwork()
     : messageCallback(nullptr)
@@ -233,6 +234,7 @@ TTNResponseCode TheThingsNetwork::transmitMessage(const uint8_t *payload, size_t
                 break;
 
             case eEvtTransmissionCompleted:
+                TheThingsNetwork_CopyLmicData(&LMIC, &TheThingsNetwork_Backup);
                 return kTTNSuccessfulTransmission;
 
             case eEvtTransmissionFailed:
@@ -288,6 +290,7 @@ void eventCallback(void* userData, ev_t event)
     {
         if (event == EV_JOINED)
         {
+            TheThingsNetwork_CopyLmicData(&TheThingsNetwork_Backup, &LMIC);
             ttnEvent = eEvtJoinCompleted;
         }
         else if (event == EV_REJOIN_FAILED || event == EV_RESET)
@@ -321,3 +324,10 @@ void messageTransmittedCallback(void *userData, int success)
     TTNLmicEvent result(success ? eEvtTransmissionCompleted : eEvtTransmissionFailed);
     xQueueSend(lmicEventQueue, &result, pdMS_TO_TICKS(100));
 }
+
+static void TheThingsNetwork_CopyLmicData(struct lmic_t* source, struct lmic_t* destination)
+{
+  destination->seqnoDn = source->seqnoDn;
+  destination->seqnoUp = source->seqnoUp;
+}
+
