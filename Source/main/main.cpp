@@ -151,6 +151,8 @@ static void InitializeComponents()
 
   // The below line can be commented after the first run as the data is saved in NVS
   ttn.provision(TTN_DEVICE_EUI, TTN_APPLICATION_EUI, TTN_APPLICATION_SESSION_KEY);
+
+  ttn.join();
 }
 
 static void Task100ms(void *pvParameters)
