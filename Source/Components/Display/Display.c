@@ -80,6 +80,11 @@ void Display_Init()
   u8g2_SetFont(&Dispaly_u8g2_Instance, u8g2_font_ncenB10_tr);
 }
 
+void Display_DeInit()
+{
+  u8g2_SetPowerSave(&Dispaly_u8g2_Instance, 1);
+}
+
 void Display_Clear()
 {
   u8g2_ClearDisplay(&Dispaly_u8g2_Instance);

@@ -20,6 +20,10 @@
  * INCLUDES
  **************************************************************************************************/
 #include "esp_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /***************************************************************************************************
  * DEFINES
  **************************************************************************************************/
@@ -33,8 +37,13 @@
  **************************************************************************************************/
 extern void Display_InitMemory();
 extern void Display_Init();
+extern void Display_DeInit();
 extern void Display_Clear();
 extern void Display_DrawString(uint8_t x, uint8_t y, const char *str);
 extern void Display_SendBuffer();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* COMPONENTS_DISPLAY_DISPLAY_H_ */
