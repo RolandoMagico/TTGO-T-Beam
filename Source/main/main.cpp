@@ -21,6 +21,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
+#include "esp_sleep.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "nvs_flash.h"
@@ -33,6 +34,11 @@ extern "C" {
 
 #include "TheThingsNetwork.h"
 #include "TheThingsNetwork_Cfg.h"
+/***************************************************************************************************
+ * DEFINES
+ **************************************************************************************************/
+#define SLEEP_TIME_FROM_SECONDS(seconds)        (seconds * 1000 * 1000)
+#define SLEEP_TIME_FROM_MINUTES(minutes)        (SLEEP_TIME_FROM_SECONDS(minutes * 60))
 /***************************************************************************************************
  * DECLARATIONS
  **************************************************************************************************/
@@ -72,9 +78,6 @@ extern "C" void app_main()
   InitializeMemory();
 
   InitializeComponents();
-
-  /* Enable voltage on LDO2 for SX1276 LORA module */
-  Axp192_SetLdo2State(Axp192_On);
 
   /* Enable voltage on LDO3 for NEO6 GPS module */
   Axp192_SetLdo3Voltage(3300);
@@ -124,6 +127,9 @@ static void InitializeComponents()
   Axp192_SetDcDc1State(Axp192_On);
   Display_Init();
 
+  /* Enable voltage on LDO2 for SX1276 LORA module */
+  Axp192_SetLdo2State(Axp192_On);
+
   /* NVS is required for storing LoRa data */
   ESP_ERROR_CHECK(nvs_flash_init());
 
@@ -154,8 +160,6 @@ static void Task100ms(void *pvParameters)
 
   size_t gpsDataLength = 0;
   uint8_t receiveBuffer[1024];
-
-
 
   for (;;)
   {
@@ -221,18 +225,30 @@ static void Task1000ms(void *pvParameters)
     lastDischargeCurrent = currentDisChargeCurrent;
     lastBatteryCharge = currentBatteryCharge;
 
-    if ((Task1000ms_SecondCounter % 60) == 0)
-    {
-      /* Uncomment the following block to shutdown
-      ESP_LOGI(__FUNCTION__, "Shutdown");
-      Axp192_SetTimer(1);
-      Axp192_Shutdown(); */
-    }
-
-    if ((Task1000ms_SecondCounter % 1000) == 0)
+    if ((Task1000ms_SecondCounter % 100) == 0)
     {
       ESP_LOGI(__FUNCTION__, "Sending TTN data");
       ttn.transmitMessage((uint8_t*)&lastBatteryVoltage, 2, 1, false);
+    }
+
+    if ((Task1000ms_SecondCounter % 150) == 0)
+    {
+      ESP_LOGI(__FUNCTION__, "Shutdown");
+
+      /* Turn off display */
+      Display_DeInit();
+
+      /* TODO: Call to Axp192_SetDcDc1State will cause I2C communication errors during wakeup */
+      /* Axp192_SetDcDc1State(Axp192_Off); */
+
+      /* Turn off LORA */
+      Axp192_SetLdo2State(Axp192_Off);
+
+      /* Turn off GPS */
+      Axp192_SetLdo3State(Axp192_Off);
+
+      Axp192_DeInit();
+      esp_deep_sleep(SLEEP_TIME_FROM_MINUTES(15));
     }
   }
 }
