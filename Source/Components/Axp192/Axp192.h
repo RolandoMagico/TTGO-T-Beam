@@ -22,6 +22,9 @@
  **************************************************************************************************/
 #include <esp_types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /***************************************************************************************************
  * DEFINES
  **************************************************************************************************/
@@ -182,6 +185,7 @@ typedef enum
  **************************************************************************************************/
 extern void Axp192_InitMemory();
 extern void Axp192_Init();
+extern void Axp192_DeInit();
 extern void Axp192_SetDcDc1State(Axp192_StateType state);
 extern void Axp192_SetDcDc1Voltage(uint16_t voltage);
 extern void Axp192_SetDcDc2State(Axp192_StateType state);
@@ -208,4 +212,9 @@ extern void Axp192_SetAdcState(Axp192_AdcType adc, Axp192_StateType state);
 extern void Axp192_SetCoulombSwitchControlState(Axp192_StateType state);
 extern Axp192_StateType Axp192_GetIrqState(Axp192_IrqType irq);
 extern void Axp192_SetIrqState(Axp192_IrqType irq, Axp192_StateType state);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* AXP192_AXP192_H_ */

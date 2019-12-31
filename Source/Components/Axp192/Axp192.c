@@ -20,6 +20,7 @@
 #include "Axp192.h"
 #include "Axp192_Cfg.h"
 #include "driver/i2c.h"
+#include "driver/rtc_io.h"
 #include "esp_log.h"
 
 /***************************************************************************************************
@@ -86,8 +87,13 @@ void Axp192_InitMemory()
 
 void Axp192_Init()
 {
-  i2c_param_config(AXP_192_I2C_PORT, &Axp192_Configuration);
-  i2c_driver_install(AXP_192_I2C_PORT, Axp192_Configuration.mode, 0, 0, ESP_INTR_FLAG_IRAM);
+  ESP_ERROR_CHECK(i2c_param_config(AXP_192_I2C_PORT, &Axp192_Configuration));
+  ESP_ERROR_CHECK(i2c_driver_install(AXP_192_I2C_PORT, Axp192_Configuration.mode, 0, 0, ESP_INTR_FLAG_IRAM));
+}
+
+void Axp192_DeInit()
+{
+  ESP_ERROR_CHECK(i2c_driver_delete(AXP_192_I2C_PORT));
 }
 
 void Axp192_SetDcDc1State(Axp192_StateType state)
