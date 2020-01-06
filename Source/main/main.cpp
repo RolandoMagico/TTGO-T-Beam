@@ -44,7 +44,6 @@ extern "C" {
  **************************************************************************************************/
 static void InitializeMemory();
 static void InitializeComponents();
-static void Task100ms(void *pvParameters);
 static void Task1000ms(void *pvParameters);
 static UBaseType_t TaskStackMonitoring(UBaseType_t lastRemainingStack);
 
@@ -79,10 +78,6 @@ extern "C" void app_main()
 
   InitializeComponents();
 
-  /* Enable voltage on LDO3 for NEO6 GPS module */
-  Axp192_SetLdo3Voltage(3300);
-  Axp192_SetLdo3State(Axp192_On);
-
   Axp192_SetPwronWakeupFunctionState(Axp192_On);
 
   /* Required for Axp192_GetBatteryDischargeCurrent */
@@ -91,8 +86,7 @@ extern "C" void app_main()
   /* Reuired for Axp192_GetBatteryCharge */
   Axp192_SetCoulombSwitchControlState(Axp192_On);
 
-  if ((xTaskCreatePinnedToCore(Task100ms, "Task100ms", 4096, NULL, 10, NULL, 0) == pdPASS) &&
-      (xTaskCreatePinnedToCore(Task1000ms, "Task1000ms", 4096, NULL, 10, NULL, 0) == pdPASS))
+  if (xTaskCreatePinnedToCore(Task1000ms, "Task1000ms", 4096, NULL, 10, NULL, 0) == pdPASS)
   {
     /* The task was created.  Use the task's handle to delete the task. */
     vTaskDelete(NULL);
@@ -120,6 +114,10 @@ static void InitializeMemory()
 static void InitializeComponents()
 {
   Axp192_Init();
+
+  /* Enable voltage on LDO3 for NEO6 GPS module */
+  Axp192_SetLdo3Voltage(3300);
+  Axp192_SetLdo3State(Axp192_On);
   Neo6_Init();
 
   /* Enable voltage on DCDC1 for display */
@@ -153,35 +151,6 @@ static void InitializeComponents()
   ttn.provision(TTN_DEVICE_EUI, TTN_APPLICATION_EUI, TTN_APPLICATION_SESSION_KEY);
 
   ttn.join();
-}
-
-static void Task100ms(void *pvParameters)
-{
-  TickType_t xLastWakeTime = xTaskGetTickCount();
-  UBaseType_t remainingTaskStack = INT32_MAX;
-
-  size_t gpsDataLength = 0;
-  uint8_t receiveBuffer[1024];
-
-  for (;;)
-  {
-    // Wait for the next cycle.
-    vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_PERIOD_MS);
-    remainingTaskStack = TaskStackMonitoring(remainingTaskStack);
-
-    Neo6_MainFunction();
-
-    if (Neo6_DataAvailable(&gpsDataLength) == Neo6_True)
-    {
-      /* Add 1 to gpsDataLength to be able to add \0 at the end of the buffer */
-      if ((gpsDataLength + 1) < sizeof(receiveBuffer))
-      {
-        Neo6_GetReceivedData(receiveBuffer);
-        receiveBuffer[gpsDataLength] = '\0';
-        printf("Received %d bytes:\n%s\n", gpsDataLength, receiveBuffer);
-      }
-    }
-  }
 }
 
 static void Task1000ms(void *pvParameters)
@@ -229,8 +198,12 @@ static void Task1000ms(void *pvParameters)
 
     if ((Task1000ms_SecondCounter % 100) == 0)
     {
-      ESP_LOGI(__FUNCTION__, "Sending TTN data");
-      ttn.transmitMessage((uint8_t*)&lastBatteryVoltage, 2, 1, false);
+      Neo6_GeodeticPositionSolutionType geodeticPositionSolution;
+      if (Neo6_GetGeodeticPositionSolution(&geodeticPositionSolution) == Neo6_Success)
+      {
+        ESP_LOGI(__FUNCTION__, "Sending TTN data");
+        ttn.transmitMessage((uint8_t*)&geodeticPositionSolution, sizeof(Neo6_GeodeticPositionSolutionType), 1, false);
+      }
     }
 
     if ((Task1000ms_SecondCounter % 150) == 0)
@@ -250,7 +223,7 @@ static void Task1000ms(void *pvParameters)
       Axp192_SetLdo3State(Axp192_Off);
 
       Axp192_DeInit();
-      esp_deep_sleep(SLEEP_TIME_FROM_MINUTES(15));
+      esp_deep_sleep(SLEEP_TIME_FROM_MINUTES(60llu));
     }
   }
 }
